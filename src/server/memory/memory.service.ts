@@ -27,7 +27,12 @@ export const memoryService = {
     sessionId: string,
     userMessage: string,
     assistantResponse: string,
-    update?: { intent?: string; validationData?: Record<string, unknown>; agentType?: string }
+    update?: {
+      intent?: string;
+      validationData?: Record<string, unknown>;
+      agentType?: string;
+      source?: 'web' | 'telegram';
+    }
   ): Promise<void> {
     await connectDB();
     await Conversation.findOneAndUpdate(
@@ -44,6 +49,9 @@ export const memoryService = {
         $set: {
           ...(update?.intent !== undefined && { currentIntent: update.intent }),
           ...(update?.validationData !== undefined && { validationData: update.validationData }),
+        },
+        $setOnInsert: {
+          ...(update?.source !== undefined && { source: update.source }),
         },
       },
       { upsert: true, new: true }
