@@ -34,7 +34,7 @@ Remote code uses **single-database** (not two-DB). All collections live in `atom
 | Collection | Index name |
 |------------|------------|
 | `vehicles` | `vehicles_vector_index` |
-| `faq` | `faq_vector_index` (not `faqs_vector_index`) |
+| `faq` | `faqs_vector_index` |
 
 ### Semantic Search (VectorSearchService)
 
@@ -43,21 +43,23 @@ Remote code uses **single-database** (not two-DB). All collections live in `atom
 - **Fallback:** if `$vectorSearch` returns empty → run regular `.find()` with simple filter
 - **No `searchDates()`** — date slots use date filter only (`GET /api/dates`)
 
-### chat.post.ts Rewiring (Phase 3 scope)
+### chat.post.ts Rewiring (PENDING — not completed in Phase 3)
 
 - Switch from `data/loader.ts` (static JSON) → MongoDB + VectorSearchService
 - Inject **top 3 vehicles + top 3 FAQs** into LLM system prompt context
 - Delete `data/loader.ts` and static JSON source files after wiring
+- **Status:** Still using static `data/loader.ts` — rewiring deferred to gap closure
 
 ### Session API
 
 | Method | Endpoint | Behavior |
 |--------|----------|----------|
 | POST | /api/sessions | Creates session, returns `{ sessionId }` |
-| GET | /api/sessions/:id | Returns session (empty `messages: []` if new — not 404) |
+| GET | /api/sessions/:id | Returns session or 404 if not found |
 
 - Sessions have **24-hour TTL** (MongoDB TTL index on `createdAt`)
 - No `DELETE /api/sessions/:id` — "Nueva Conversación" creates a new session ID instead
+- Unknown session IDs return **404** (strict — no auto-create)
 
 ---
 
@@ -140,7 +142,7 @@ Remote code uses **single-database** (not two-DB). All collections live in `atom
 
 ### Key Decisions
 
-- **Embeddings:** Gemini text-embedding-004 (768 dimensions)
+- **Embeddings:** Gemini `gemini-embedding-001` (768 dimensions) via `@google/genai`
 - **Seed script:** `npm run seed` (manual, one-time)
 - **Vector search:** Internal to POST /api/chat, no separate search endpoint
 - **Field names:** Normalized from Spanish to English (Marca→brand, Precio→price, etc.)
