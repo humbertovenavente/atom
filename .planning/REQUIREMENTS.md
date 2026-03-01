@@ -9,11 +9,11 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: POST /api/chat endpoint accepts sessionId + message and returns SSE event stream
-- [ ] **INFRA-02**: SSE emits typed events: agent_active, message_chunk, validation_update, done, error
+- [x] **INFRA-01**: POST /api/chat endpoint accepts sessionId + message and returns SSE event stream
+- [x] **INFRA-02**: SSE emits typed events: agent_active, message_chunk, validation_update, done, error
 - [ ] **INFRA-03**: MongoDB Atlas connection with cached singleton pattern for serverless
 - [ ] **INFRA-04**: Static JSON data files loaded and accessible to specialist agents (faqs.json, catalog.json, schedule.json)
-- [ ] **INFRA-05**: TypeScript interfaces for all shared types (ChatRequest, ChatMessage, AgentType, FlowConfig, SSEEvent, etc.)
+- [x] **INFRA-05**: TypeScript interfaces for all shared types (ChatRequest, ChatMessage, AgentType, FlowConfig, SSEEvent, etc.)
 
 ### Memory
 
@@ -103,11 +103,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Pending |
 | INFRA-04 | Phase 1 | Pending |
-| INFRA-05 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Complete |
 | MEM-01 | Phase 1 | Pending |
 | MEM-02 | Phase 1 | Pending |
 | MEM-04 | Phase 1 | Pending |
