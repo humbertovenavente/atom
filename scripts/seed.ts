@@ -1,16 +1,16 @@
 /**
  * Seed script: Populates MongoDB Atlas with vehicles, FAQs, and date slots.
- * Generates OpenAI embeddings for vehicles and FAQs.
+ * Generates Gemini embeddings for vehicles and FAQs.
  * Creates Atlas Vector Search indexes and polls until READY.
  *
  * Usage: npm run seed
- * Requires: LLM_API_KEY (and optionally LLM_BASE_URL) in .env
+ * Requires: GEMINI_API_KEY in .env
  */
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import mongoose from 'mongoose';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 import { connectDB } from '../src/server/db/connect.js';
 import { Vehicle } from '../src/server/models/vehicle.js';
 import { FAQ } from '../src/server/models/faq.js';
@@ -28,18 +28,36 @@ try {
   console.warn('Warning: could not load .env file — using existing environment variables');
 }
 
-if (!process.env['LLM_API_KEY']) {
-  throw new Error('LLM_API_KEY not set in .env');
+if (!process.env['GEMINI_API_KEY']) {
+  throw new Error('GEMINI_API_KEY not set in .env');
 }
 
-const openai = new OpenAI({
-  apiKey: process.env['LLM_API_KEY'],
-  baseURL: process.env['LLM_BASE_URL'] || undefined,
-});
+const genai = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
 
 // ---------------------------------------------------------------------------
 // Embedding helper
 // ---------------------------------------------------------------------------
+
+async function embedWithRetry(batch: string[], maxRetries = 3): Promise<number[][]> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await genai.models.embedContent({
+        model: 'gemini-embedding-001',
+        contents: batch,
+      });
+      return response.embeddings!.map(emb => emb.values!);
+    } catch (err: any) {
+      if (err.status === 429 && attempt < maxRetries) {
+        const waitSec = 60;
+        console.log(`  Rate limited — waiting ${waitSec}s before retry (${attempt + 1}/${maxRetries})...`);
+        await new Promise(r => setTimeout(r, waitSec * 1000));
+      } else {
+        throw err;
+      }
+    }
+  }
+  return []; // unreachable
+}
 
 async function embedBatch(texts: string[], batchSize = 20): Promise<number[][]> {
   const results: number[][] = [];
@@ -51,18 +69,12 @@ async function embedBatch(texts: string[], batchSize = 20): Promise<number[][]> 
 
     console.log(`  Embedding batch ${batchNum}/${totalBatches} (${batch.length} texts)...`);
 
-    const response = await openai.embeddings.create({
-      model: 'text-embedding-3-small',
-      input: batch,
-    });
-
-    for (const item of response.data) {
-      results.push(item.embedding);
-    }
+    const embeddings = await embedWithRetry(batch);
+    results.push(...embeddings);
 
     // Rate limit courtesy delay between batches
     if (i + batchSize < texts.length) {
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 2000));
     }
   }
 
@@ -176,7 +188,7 @@ const VECTOR_INDEX_DEFINITION = {
     {
       type: 'vector',
       path: 'embedding',
-      numDimensions: 1536,
+      numDimensions: 768,
       similarity: 'cosine',
     },
   ],
@@ -291,18 +303,22 @@ async function main(): Promise<void> {
   console.log(`Seeded: ${rawVehicles.length} vehicles, ${faqDocs.length} FAQs, ${dateDocs.length} date slots\n`);
 
   // 6. Atlas Vector Search indexes
+  const vehicleColl = Vehicle.collection.name;
+  const faqColl = FAQ.collection.name;
+  console.log(`  Collection names: vehicles=${vehicleColl}, faqs=${faqColl}`);
+
   const dbName = process.env['MONGODB_DB_NAME'] ?? 'atom_knowledge';
   const db = mongoose.connection.getClient().db(dbName);
 
   console.log('Setting up Atlas Vector Search indexes...');
-  await ensureVectorIndex(db, 'vehicles', 'vehicles_vector_index');
-  await ensureVectorIndex(db, 'faqs', 'faqs_vector_index');
+  await ensureVectorIndex(db, vehicleColl, 'vehicles_vector_index');
+  await ensureVectorIndex(db, faqColl, 'faqs_vector_index');
   console.log();
 
   console.log('Polling until indexes are READY (timeout: 3 min)...');
   await Promise.all([
-    pollUntilReady(db, 'vehicles', 'vehicles_vector_index'),
-    pollUntilReady(db, 'faqs', 'faqs_vector_index'),
+    pollUntilReady(db, vehicleColl, 'vehicles_vector_index'),
+    pollUntilReady(db, faqColl, 'faqs_vector_index'),
   ]);
   console.log('\nAll vector search indexes are READY.\n');
 

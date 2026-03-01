@@ -1,32 +1,29 @@
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 import { connectDB } from '../db/connect';
 import { Vehicle } from '../models/vehicle';
 import { FAQ } from '../models/faq';
 
-// Lazy OpenAI client initialization — not created at import time
-let openaiClient: OpenAI | null = null;
+// Lazy Gemini client initialization — not created at import time
+let genaiClient: GoogleGenAI | null = null;
 
-function getOpenAI(): OpenAI {
-  if (!openaiClient) {
-    const apiKey = process.env['LLM_API_KEY'];
+function getGenAI(): GoogleGenAI {
+  if (!genaiClient) {
+    const apiKey = process.env['GEMINI_API_KEY'];
     if (!apiKey) {
-      throw new Error('LLM_API_KEY environment variable is not set');
+      throw new Error('GEMINI_API_KEY environment variable is not set');
     }
-    openaiClient = new OpenAI({
-      apiKey,
-      ...(process.env['LLM_BASE_URL'] ? { baseURL: process.env['LLM_BASE_URL'] } : {}),
-    });
+    genaiClient = new GoogleGenAI({ apiKey });
   }
-  return openaiClient;
+  return genaiClient;
 }
 
 async function embedQuery(text: string): Promise<number[]> {
-  const openai = getOpenAI();
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text,
+  const genai = getGenAI();
+  const response = await genai.models.embedContent({
+    model: 'gemini-embedding-001',
+    contents: text,
   });
-  return response.data[0].embedding;
+  return response.embeddings![0].values!;
 }
 
 export const vectorSearchService = {

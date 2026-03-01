@@ -16,6 +16,7 @@ export async function connectDB(): Promise<void> {
   }
 
   global._mongooseConn = await mongoose.connect(uri, {
+    dbName: process.env['MONGODB_DB_NAME'] || 'atom_knowledge',
     maxPoolSize: 3,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
