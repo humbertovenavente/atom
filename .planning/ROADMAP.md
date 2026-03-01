@@ -94,5 +94,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
 | 3. Data & Backend | 1/2 | In Progress|  |
-| 4. Chat & SSE Integration | 0/2 | Planned | - |
+| 4. Chat & SSE Integration | 1/2 | In Progress|  |
 | 5. Configuration & Polish | 0/? | Not started | - |
