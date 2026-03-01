@@ -37,22 +37,23 @@ const EMOJI_MAP: Record<string, string> = {
     @if (flowService.selectedNodeId()) {
       <app-node-config-panel [nodeId]="flowService.selectedNodeId()!" />
     } @else {
-      <div class="h-full bg-gray-900 text-white border-r border-gray-700/50 flex flex-col">
-        <div class="px-4 py-3 border-b border-gray-700/50">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Nodes</h2>
+      <div class="h-full flex flex-col border-r"
+        style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
+        <div class="px-4 py-3 border-b" style="border-color: var(--border-primary);">
+          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">Nodes</h2>
         </div>
         <div class="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           @for (config of nodeTypes; track config.type) {
             <div
               draggable="true"
               (dragstart)="onDragStart($event, config.type)"
-              class="rounded-lg p-2.5 cursor-grab hover:bg-gray-800/70 transition-all duration-150 select-none border border-transparent hover:border-gray-700/50"
+              class="theme-hover rounded-lg p-2.5 cursor-grab transition-all duration-150 select-none border border-transparent"
               [style.borderLeft]="'3px solid ' + config.color + ' !important'">
               <div class="flex items-center gap-2 mb-0.5">
                 <span class="text-base">{{ getEmoji(config.icon) }}</span>
-                <span class="text-sm font-medium text-gray-100">{{ config.label }}</span>
+                <span class="text-sm font-medium" style="color: var(--text-primary);">{{ config.label }}</span>
               </div>
-              <p class="text-xs text-gray-500 leading-snug pl-7">{{ config.description }}</p>
+              <p class="text-xs leading-snug pl-7" style="color: var(--text-tertiary);">{{ config.description }}</p>
             </div>
           }
         </div>

@@ -29,13 +29,14 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
   imports: [FormsModule, NgClass],
   host: { class: 'flex flex-col h-full min-h-0 overflow-hidden' },
   template: `
-    <div class="flex flex-col h-full bg-gray-900 text-white border-l border-gray-700/50">
+    <div class="flex flex-col h-full border-l" style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-gray-700/50 flex-shrink-0 flex items-center justify-between">
+      <div class="px-4 py-3 border-b flex-shrink-0 flex items-center justify-between" style="border-color: var(--border-primary);">
         <div class="flex items-center gap-2">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Chat</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">Chat</h2>
           <button (click)="toggleHistory()"
-            class="text-gray-500 hover:text-gray-300 transition-colors"
+            class="transition-colors"
+            style="color: var(--text-tertiary);"
             [class.text-blue-400]="showHistory()"
             title="Conversation history">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,7 +46,8 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
           </button>
         </div>
         <button (click)="newConversation()"
-          class="text-xs border border-gray-600/70 text-gray-400 hover:text-white hover:border-gray-400 hover:bg-gray-800/50 px-2.5 py-1 rounded-md transition-all duration-150">
+          class="text-xs px-2.5 py-1 rounded-md transition-all duration-150"
+          style="border: 1px solid var(--border-primary); color: var(--text-secondary);">
           New Conversation
         </button>
       </div>
@@ -64,13 +66,13 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
             @for (session of chat.sessionHistory(); track session.sessionId) {
               <div class="group relative">
                 @if (editingSessionId() === session.sessionId) {
-                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2.5 bg-gray-800 border border-gray-600">
+                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2.5" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary);">
                     <input
                       type="text"
                       [(ngModel)]="editingTitle"
                       (keydown.enter)="confirmRename(session.sessionId)"
                       (keydown.escape)="cancelRename()"
-                      class="flex-1 bg-transparent text-sm text-white outline-none min-w-0"
+                      class="flex-1 bg-transparent text-sm outline-none min-w-0" style="color: var(--text-primary);"
                       autofocus
                     />
                     <button (click)="confirmRename(session.sessionId)" class="text-green-400 hover:text-green-300 shrink-0 p-0.5" title="Save">
@@ -86,19 +88,22 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
                     class="w-full text-left rounded-lg px-3 py-2.5 pr-16 transition-all duration-150 border border-transparent"
                     [class]="session.sessionId === chat.sessionId()
                       ? 'bg-blue-600/15 border-blue-500/30 text-blue-300'
-                      : 'hover:bg-gray-800/60 text-gray-300 hover:border-gray-700/50'">
+                      : 'theme-hover'"
+                    [style]="session.sessionId !== chat.sessionId() ? 'color: var(--text-secondary)' : ''">
                     <p class="text-sm truncate">{{ session.title || session.preview }}</p>
-                    <p class="text-[10px] text-gray-500 mt-0.5">{{ formatDate(session.updatedAt) }}</p>
+                    <p class="text-[10px] mt-0.5" style="color: var(--text-tertiary);">{{ formatDate(session.updatedAt) }}</p>
                   </button>
                   <!-- Action buttons -->
                   <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button (click)="startRename(session); $event.stopPropagation()"
-                      class="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-gray-700/60 transition-colors"
+                      class="p-1.5 rounded-md transition-colors theme-hover"
+                    style="color: var(--text-tertiary);"
                       title="Rename">
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                     </button>
                     <button (click)="deleteSession(session.sessionId); $event.stopPropagation()"
-                      class="p-1.5 rounded-md text-gray-500 hover:text-red-400 hover:bg-gray-700/60 transition-colors"
+                      class="p-1.5 rounded-md hover:text-red-400 transition-colors theme-hover"
+                      style="color: var(--text-tertiary);"
                       title="Delete">
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
@@ -117,14 +122,15 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
           <!-- Empty state: welcome + chips -->
           @if (chat.messages().length === 0 && !chat.isStreaming()) {
             <div class="flex flex-col items-center gap-5 py-10">
-              <p class="text-gray-400 text-sm text-center max-w-[260px] leading-relaxed">
+              <p class="text-sm text-center max-w-[260px] leading-relaxed" style="color: var(--text-secondary);">
                 Hi! I'm your Volkswagen assistant. How can I help you today?
               </p>
               <div class="flex flex-col gap-2 w-full max-w-[260px]">
                 @for (chip of suggestionChips; track chip) {
                   <button
                     (click)="fillInput(chip)"
-                    class="text-left text-sm bg-gray-800/60 hover:bg-gray-700/70 text-gray-300 rounded-lg px-3 py-2.5 border border-gray-600/50 hover:border-gray-500/60 transition-all duration-150">
+                    class="text-left text-sm rounded-lg px-3 py-2.5 transition-all duration-150 theme-hover"
+                    style="color: var(--text-secondary); border: 1px solid var(--border-primary);">
                     {{ chip }}
                   </button>
                 }
@@ -136,9 +142,8 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
           @for (message of chat.messages(); track $index) {
             <div class="flex" [class.justify-end]="message.role === 'user'">
               <div class="max-w-[85%] rounded-xl px-3.5 py-2.5"
-                [ngClass]="message.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-sm'
-                  : 'bg-gray-800/80 text-gray-100 rounded-bl-sm'">
+                [ngClass]="message.role === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'rounded-bl-sm'"
+                [style]="message.role !== 'user' ? 'background: var(--bg-tertiary); color: var(--text-primary);' : ''">
 
                 <!-- Agent badge for assistant messages -->
                 @if (message.role === 'assistant' && getAgentBadge(message.agentType)) {
@@ -174,14 +179,15 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
 
       <!-- Input bar -->
       @if (!showHistory()) {
-        <div class="flex-shrink-0 border-t border-gray-700/50 p-3 flex gap-2">
+        <div class="flex-shrink-0 border-t p-3 flex gap-2" style="border-color: var(--border-primary);">
           <input
             type="text"
             [(ngModel)]="inputText"
             (keydown)="onKeydown($event)"
             [disabled]="chat.isStreaming()"
             placeholder="Type your message..."
-            class="flex-1 bg-gray-800/70 text-white text-sm rounded-lg px-3.5 py-2.5 border border-gray-600/50 outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed placeholder:text-gray-500"
+            class="flex-1 text-sm rounded-lg px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-blue-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
           />
           <button
             (click)="send()"

@@ -31,9 +31,9 @@ const DEFAULT_PROMPTS: Record<string, string> = {
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="h-full bg-gray-900 text-white border-r border-gray-700 flex flex-col">
+    <div class="h-full flex flex-col border-r" style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+      <div class="px-4 py-3 border-b flex items-center justify-between" style="border-color: var(--border-primary);">
         <div class="flex items-center gap-2 min-w-0">
           <span class="text-lg flex-shrink-0">{{ emoji() }}</span>
           <span class="text-sm font-medium truncate">{{ nodeLabel() }}</span>
@@ -46,7 +46,8 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         </div>
         <button
           (click)="close()"
-          class="text-gray-400 hover:text-white text-xl leading-none flex-shrink-0 ml-2"
+          class="text-xl leading-none flex-shrink-0 ml-2 transition-colors"
+          style="color: var(--text-secondary);"
           title="Close configuration">
           &times;
         </button>
@@ -56,21 +57,22 @@ const DEFAULT_PROMPTS: Record<string, string> = {
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
         <!-- System Prompt -->
         <div>
-          <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+          <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
             System Prompt
           </label>
           <textarea
             [value]="currentPrompt()"
             (input)="onPromptChange($event)"
             rows="8"
-            class="w-full bg-gray-800 text-white text-sm rounded-lg p-3 border border-gray-600 outline-none focus:border-blue-500 resize-none leading-relaxed"
+            class="w-full text-sm rounded-lg p-3 outline-none focus:border-blue-500 resize-none leading-relaxed"
+            style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
             placeholder="System instructions for this agent...">
           </textarea>
         </div>
 
         <!-- Temperature -->
         <div>
-          <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+          <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
             Temperature: {{ currentTemp() }}
           </label>
           <input
@@ -81,14 +83,14 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             [value]="currentTemp()"
             (input)="onTempChange($event)"
             class="w-full accent-blue-500" />
-          <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <div class="flex justify-between text-xs mt-1" style="color: var(--text-tertiary);">
             <span>0 (precise)</span>
             <span>2 (creative)</span>
           </div>
         </div>
 
         <!-- Delete node -->
-        <div class="pt-2 border-t border-gray-700/50">
+        <div class="pt-2 border-t" style="border-color: var(--border-primary);">
           <button
             (click)="deleteNode()"
             class="w-full text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-2 transition-all duration-150">

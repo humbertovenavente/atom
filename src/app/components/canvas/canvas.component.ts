@@ -29,7 +29,7 @@ const NODE_TYPE_CONFIGS = [
   imports: [FFlowModule, NgFor],
   host: {
     class: 'block w-full h-full relative overflow-hidden',
-    style: 'background: #0F172A;',
+    style: 'background: var(--canvas-bg);',
   },
   templateUrl: './canvas.component.html',
 })
