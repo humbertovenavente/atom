@@ -1,0 +1,2 @@
+# .planning/ is local planning state — always keep ours on merge conflicts
+.planning/** merge=ours
