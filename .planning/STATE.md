@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T18:20:47.093Z"
+last_updated: "2026-03-01T19:23:20.428Z"
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 8
+  total_phases: 6
+  completed_phases: 4
+  total_plans: 9
+  completed_plans: 13
 ---
 
 # Project State
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 5 of 6 (Configuration & Polish)
-Plan: 1 of 2 in current phase (05-01 complete — NodeConfigPanel + FlowService extensions)
-Status: In Progress
-Last activity: 2026-03-01 — Plan 05-01 complete (NodeConfigPanel, FlowService updateNodeConfig/saveFlow/resetFlow, sidebar swap, node--selected CSS)
+Plan: 2 of 2 in current phase (05-02 complete — Flow persistence + action buttons)
+Status: Phase Complete
+Last activity: 2026-03-01 — Plan 05-02 complete (Mongoose Flow model, POST/GET /api/flow, FlowToolbar, Nueva Conversacion, layout update)
 
 Progress: [██████████] 100%
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 | Phase 05-configuration-polish P01 | 2min | 2 tasks | 6 files |
+| Phase 05-configuration-polish P02 | 13min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,10 @@ Recent decisions affecting current work:
 - [05-01]: resetFlow() calls GET /api/flow?default=true — Plan 02 implements backend ?default=true param to bypass MongoDB lookup
 - [05-01]: saveFlow() uses raw fetch() (not HttpClient) — consistent with ChatService SSE pattern
 - [05-01]: node--selected CSS uses dashed outline + box-shadow, no animation — distinct from node--active pulse
+- [05-02]: Flow saved as singleton document (flowId: 'default') — no per-user flows needed for hackathon demo
+- [05-02]: GET /api/flow?default=true bypasses MongoDB to return hardcoded defaults — clean reset without deleting DB record
+- [05-02]: FlowToolbar placed in flex-col wrapper above canvas (not 4th grid column) — preserves 3-column layout contract
+- [05-02]: Default temperature set to 0.3 — more deterministic outputs for demo reliability
 
 ### Pending Todos
 
@@ -122,5 +127,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-01-PLAN.md (NodeConfigPanel + FlowService extensions + sidebar swap)
+Stopped at: Completed 05-02-PLAN.md (Flow persistence + FlowToolbar + Nueva Conversacion — Phase 5 complete)
 Resume file: None
