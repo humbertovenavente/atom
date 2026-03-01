@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T20:08:21.506Z"
+last_updated: "2026-03-01T20:51:44Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 5 of 5 (Add Telegram Node to Visual Flow Editor)
-Plan: 1 of 4 in current phase (05-01 complete)
+Plan: 3 of 4 in current phase (05-03 complete)
 Status: In Progress
-Last activity: 2026-03-01 — Plan 05-01 complete (type union, botToken schema, source field, $setOnInsert save())
+Last activity: 2026-03-01 — Plan 05-03 complete (Telegram webhook handler, non-streaming agent pipeline, sendMessage via Bot API)
 
 Progress: [██████████] 100%
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
+| Phase 05-telegram P03 | 1min | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -111,6 +112,13 @@ Recent decisions affecting current work:
 - [04-02]: Phase 4 end-to-end verified — all 4 manual tests passed: generic streaming, catalog multi-turn field collection, schedule multi-turn appointment, session persistence
 - [05-01]: botToken declared in Mongoose nodeConfigSchema — required to bypass strict mode silent strip on save
 - [05-01]: $setOnInsert used for conversation source field — ensures channel type is immutable after first write
+- [05-02]: Telegram Bot API called directly from browser — Telegram allows CORS on api.telegram.org, no server proxy needed
+- [05-02]: registerStatus uses Angular signal (not RxJS) — consistent with signals-first architecture from Phase 2
+- [05-02]: Webhook URL auto-derived from window.location.origin + '/api/telegram' — matches Phase 5-03 backend endpoint
+- [05-03]: Always return 200 to Telegram — non-200 triggers retry storms (up to 1 hour of retries)
+- [05-03]: parse_mode NOT set in sendMessage — plain text only (Markdown can cause delivery failures)
+- [05-03]: generateContent() used (not generateContentStream()) — Telegram requires a complete reply before sendMessage
+- [05-03]: Bot token read from MongoDB flow at request time — supports runtime reconfiguration without restart
 
 ### Roadmap Evolution
 
@@ -128,5 +136,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 05 Plan 01 complete — 05-01-PLAN.md
-Resume file: .planning/phases/05-add-telegram-node-to-visual-flow-editor/05-02-PLAN.md
+Stopped at: Phase 05 Plan 03 complete — 05-03-PLAN.md
+Resume file: .planning/phases/05-add-telegram-node-to-visual-flow-editor/05-04-PLAN.md
