@@ -12,6 +12,7 @@ import { NgClass } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { ChatService } from '../../services/chat.service';
+import { FlowService } from '../../services/flow.service';
 import type { ChatMessage } from '@models/types';
 
 const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
@@ -30,8 +31,12 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
   template: `
     <div class="flex flex-col h-full bg-gray-900 text-white border-l border-gray-700">
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-gray-700 flex-shrink-0">
+      <div class="px-4 py-3 border-b border-gray-700 flex-shrink-0 flex items-center justify-between">
         <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Chat Playground</h2>
+        <button (click)="newConversation()"
+          class="text-xs border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 px-2 py-1 rounded-md transition-colors">
+          Nueva Conversacion
+        </button>
       </div>
 
       <!-- Messages area -->
@@ -117,6 +122,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
 })
 export class ChatComponent {
   readonly chat = inject(ChatService);
+  private readonly flowService = inject(FlowService);
   private readonly sanitizer = inject(DomSanitizer);
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
@@ -147,6 +153,12 @@ export class ChatComponent {
         this.chat.loadSession(savedId).catch(() => localStorage.removeItem('chat_session_id'));
       }
     });
+  }
+
+  newConversation(): void {
+    this.chat.startNewSession();
+    this.flowService.setActiveNode(null);
+    this.flowService.clearCompletedNodes();
   }
 
   send(): void {
