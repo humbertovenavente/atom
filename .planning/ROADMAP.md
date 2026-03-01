@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Setup** - Analog.js scaffold, @foblex/flow, Tailwind, 3-panel layout, types, MongoDB connection
 - [x] **Phase 2: Flow Editor** - Custom nodes, drag & drop, edges, mini-map, zoom, FlowService
 - [x] **Phase 3: Data & Backend** - Seed MongoDB Atlas con vector embeddings desde jsons/, API routes para vehicles/dates/FAQ, users & sessions (completed 2026-03-01)
-- [ ] **Phase 4: Chat & SSE Integration** - Chat UI, streaming, typing indicator, node highlighting, ChatService
+- [x] **Phase 4: Chat & SSE Integration** - Chat UI, streaming, typing indicator, node highlighting, ChatService (completed 2026-03-01)
 - [x] **Phase 5: Configuration & Polish** - Config panel, save/load flow, reset/new chat buttons (completed 2026-03-01)
 
 ## Phase Details
@@ -71,7 +71,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. When a `node_active` SSE event arrives, the corresponding node on the canvas visually highlights; the highlight clears when processing moves on
   5. Auto-scroll follows new messages when the user is at the bottom; stops auto-scrolling when the user scrolls up
   6. La sesión de chat se persiste en MongoDB (sessions collection)
-**Plans**: TBD
+**Plans**: 2 plans
+- [x] 04-01-PLAN.md — ChatService with SSE streaming, session management, FlowService bridge for node highlighting
+- [x] 04-02-PLAN.md — Chat UI component with markdown rendering, typing indicator, auto-scroll, suggestion chips, session restore
 
 ### Phase 5: Configuration & Polish
 **Goal**: Users can click any node to edit its configuration, persist the flow to the backend, reset to defaults, and start a new conversation — the app is demo-ready
@@ -82,7 +84,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The flow can be saved to the backend (POST /api/flow) and reloaded (GET /api/flow) without losing node positions or configuration
   3. "Reset Flow" returns the canvas to the default 8-node layout
   4. "Nueva Conversacion" clears the chat history and starts a fresh session (nueva session en MongoDB)
-**Plans**: TBD
+**Plans**: 2 plans
+- [x] 05-01-PLAN.md — Node config panel, save/load flow API
+- [x] 05-02-PLAN.md — Reset flow, new chat buttons, demo polish
 
 ## Progress
 
@@ -94,5 +98,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
 | 3. Data & Backend | 4/4 | Done | 2026-03-01 |
-| 4. Chat & SSE Integration | 0/? | Not started | - |
+| 4. Chat & SSE Integration | 2/2 | Done | 2026-03-01 |
 | 5. Configuration & Polish | 2/2 | Complete   | 2026-03-01 |
