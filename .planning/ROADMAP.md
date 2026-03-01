@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Infrastructure** - SSE streaming + MongoDB proven on a live Vercel Preview URL (hard gate)
 - [ ] **Phase 2: Orchestrator + Generic** - Intent classification routing to all 4 paths with end-to-end generic agent streaming
 - [ ] **Phase 3: Validators + Specialists + Flow** - All 3 use cases end-to-end with full validator/specialist pipeline and editor config persistence
-- [ ] **Phase 4: Differentiators** - Bonus features: cross-session memory persistence, pipeline consumes saved node configs
+- [ ] **Phase 4: Differentiators** - Bonus features: cross-session memory persistence, RAG for FAQs, pipeline consumes saved node configs
 
 ## Phase Details
 
@@ -66,12 +66,14 @@ Plans:
 - [ ] 03-01: TBD
 
 ### Phase 4: Differentiators
-**Goal**: Cross-session memory earns the +5 bonus points and the pipeline uses saved editor node configs (custom prompts, temperature) to differentiate the architecture score
+**Goal**: Earn all bonus points — cross-session memory (+5 pts), RAG with vector search for FAQs (bonus), and pipeline consumes saved editor node configs for maximum architecture score
 **Depends on**: Phase 3
-**Requirements**: MEM-03, FLOW-03
+**Requirements**: MEM-03, FLOW-03, RAG-01, RAG-02, RAG-03
 **Success Criteria** (what must be TRUE):
   1. A returning user with the same sessionId picks up their prior conversation history from a previous browser session
   2. After saving a custom system prompt for the orchestrator node via POST /api/flow, the next pipeline execution uses that prompt instead of the default
+  3. FAQ entries are embedded with Gemini text-embedding-004 and stored in MongoDB Atlas with a vector search index
+  4. FAQ specialist retrieves semantically relevant entries via vector search instead of loading the full JSON file
 **Plans**: TBD
 
 Plans:

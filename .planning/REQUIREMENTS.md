@@ -60,6 +60,12 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 - [ ] **FLOW-02**: GET /api/flow loads saved flow configuration
 - [ ] **FLOW-03**: Pipeline uses node configs (edited system prompts, temperature) from saved flow when available
 
+### RAG
+
+- [ ] **RAG-01**: FAQ entries embedded using Gemini text-embedding-004 and stored in MongoDB Atlas with vector search index
+- [ ] **RAG-02**: FAQ specialist uses vector search to retrieve semantically relevant FAQ entries instead of loading full JSON
+- [ ] **RAG-03**: API route or startup script to seed FAQ embeddings into MongoDB Atlas
+
 ### Cross-Cutting
 
 - [ ] **CROSS-01**: Agent activation SSE events emitted before and after each agent processes (for frontend node highlighting)
@@ -74,7 +80,7 @@ Deferred to post-hackathon. Tracked but not in current roadmap.
 ### Advanced Features
 
 - **ADV-01**: Token streaming — stream LLM response token-by-token instead of full message
-- **ADV-02**: RAG with vector database for FAQ retrieval
+- ~~**ADV-02**: RAG with vector database for FAQ retrieval~~ → Promoted to v1 (RAG-01, RAG-02, RAG-03)
 - **ADV-03**: Real external API integrations (actual scheduling system, inventory API)
 - **ADV-04**: Channel integrations (WhatsApp, Messenger)
 - **ADV-05**: Conversation analytics dashboard
@@ -133,10 +139,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLOW-02 | Phase 3 | Pending |
 | MEM-03 | Phase 4 | Pending |
 | FLOW-03 | Phase 4 | Pending |
+| RAG-01 | Phase 4 | Pending |
+| RAG-02 | Phase 4 | Pending |
+| RAG-03 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 36 total
-- Mapped to phases: 36
+- v1 requirements: 39 total
+- Mapped to phases: 39
 - Unmapped: 0
 
 ---
