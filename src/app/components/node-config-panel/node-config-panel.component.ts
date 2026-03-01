@@ -14,16 +14,16 @@ const EMOJI_MAP: Record<string, string> = {
 
 const DEFAULT_PROMPTS: Record<string, string> = {
   orchestrator:
-    'Eres un orquestador de intención. Analiza el mensaje del usuario y determina cuál agente especializado debe responder.',
+    'You are an intent orchestrator. Analyze the user message and determine which specialized agent should respond.',
   memory:
-    'Eres un agente de memoria. Recupera y almacena el contexto relevante de la conversación.',
+    'You are a memory agent. Retrieve and store relevant conversation context.',
   validator:
-    'Eres un validador. Verifica que los datos recopilados sean completos y correctos antes de continuar.',
+    'You are a validator. Verify that collected data is complete and correct before proceeding.',
   specialist:
-    'Eres un especialista en tu dominio. Proporciona respuestas precisas y detalladas sobre tu área de expertise.',
+    'You are a domain specialist. Provide precise and detailed answers about your area of expertise.',
   generic:
-    'Eres un asistente general. Responde de forma útil y amigable cuando ningún especialista aplique.',
-  tool: 'Eres una herramienta de búsqueda. Consulta fuentes externas y devuelve datos estructurados.',
+    'You are a general assistant. Respond helpfully and friendly when no specialist applies.',
+  tool: 'You are a search tool. Query external sources and return structured data.',
 };
 
 @Component({
@@ -47,13 +47,27 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         <button
           (click)="close()"
           class="text-gray-400 hover:text-white text-xl leading-none flex-shrink-0 ml-2"
-          title="Cerrar configuración">
+          title="Close configuration">
           &times;
         </button>
       </div>
 
       <!-- Form body -->
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Node Label -->
+        <div>
+          <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+            Node Name
+          </label>
+          <input
+            type="text"
+            [value]="nodeLabel()"
+            (input)="onLabelChange($event)"
+            class="w-full bg-gray-800 text-white text-sm rounded-lg p-2.5 border border-gray-600 outline-none focus:border-blue-500 transition-colors"
+            placeholder="Node name..."
+          />
+        </div>
+
         <!-- System Prompt -->
         <div>
           <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
@@ -64,7 +78,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             (input)="onPromptChange($event)"
             rows="8"
             class="w-full bg-gray-800 text-white text-sm rounded-lg p-3 border border-gray-600 outline-none focus:border-blue-500 resize-none leading-relaxed"
-            placeholder="Instrucciones del sistema para este agente...">
+            placeholder="System instructions for this agent...">
           </textarea>
         </div>
 
@@ -85,6 +99,15 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             <span>0 (precise)</span>
             <span>2 (creative)</span>
           </div>
+        </div>
+
+        <!-- Delete node -->
+        <div class="pt-2 border-t border-gray-700/50">
+          <button
+            (click)="deleteNode()"
+            class="w-full text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-2 transition-all duration-150">
+            Delete Node
+          </button>
         </div>
       </div>
     </div>
@@ -114,6 +137,18 @@ export class NodeConfigPanelComponent {
 
   close(): void {
     this.flowService.setSelectedNode(null);
+  }
+
+  onLabelChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.flowService.updateNodeLabel(this.nodeId(), value);
+  }
+
+  deleteNode(): void {
+    if (window.confirm('Delete this node?')) {
+      this.flowService.setSelectedNode(null);
+      this.flowService.removeNode(this.nodeId());
+    }
   }
 
   onPromptChange(event: Event): void {

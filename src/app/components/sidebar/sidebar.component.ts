@@ -11,12 +11,12 @@ interface NodeTypeConfig {
 }
 
 const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
-  { type: 'memory', label: 'Memoria', icon: 'brain', color: '#8B5CF6', description: 'Almacena contexto de conversación' },
-  { type: 'orchestrator', label: 'Orquestador', icon: 'target', color: '#3B82F6', description: 'Dirige el flujo de agentes' },
-  { type: 'validator', label: 'Validador', icon: 'check-circle', color: '#10B981', description: 'Valida datos recolectados' },
-  { type: 'specialist', label: 'Especialista', icon: 'zap', color: '#F59E0B', description: 'Experto en dominio específico' },
-  { type: 'generic', label: 'Genérico', icon: 'message-circle', color: '#6B7280', description: 'Respuestas generales' },
-  { type: 'tool', label: 'Herramienta', icon: 'tool', color: '#EF4444', description: 'Herramienta externa' },
+  { type: 'memory', label: 'Memory', icon: 'brain', color: '#8B5CF6', description: 'Stores conversation context' },
+  { type: 'orchestrator', label: 'Orchestrator', icon: 'target', color: '#3B82F6', description: 'Routes agent flow' },
+  { type: 'validator', label: 'Validator', icon: 'check-circle', color: '#10B981', description: 'Validates collected data' },
+  { type: 'specialist', label: 'Specialist', icon: 'zap', color: '#F59E0B', description: 'Domain-specific expert' },
+  { type: 'generic', label: 'Generic', icon: 'message-circle', color: '#6B7280', description: 'General responses' },
+  { type: 'tool', label: 'Tool', icon: 'tool', color: '#EF4444', description: 'External tool integration' },
 ];
 
 const EMOJI_MAP: Record<string, string> = {
@@ -32,27 +32,27 @@ const EMOJI_MAP: Record<string, string> = {
   selector: 'app-sidebar',
   standalone: true,
   imports: [NodeConfigPanelComponent],
-  host: { class: 'block h-full overflow-y-auto' },
+  host: { class: 'block h-full overflow-hidden' },
   template: `
     @if (flowService.selectedNodeId()) {
       <app-node-config-panel [nodeId]="flowService.selectedNodeId()!" />
     } @else {
-      <div class="h-full bg-gray-900 text-white border-r border-gray-700 flex flex-col">
-        <div class="px-4 py-3 border-b border-gray-700">
-          <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Nodos</h2>
+      <div class="h-full bg-gray-900 text-white border-r border-gray-700/50 flex flex-col">
+        <div class="px-4 py-3 border-b border-gray-700/50">
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Nodes</h2>
         </div>
-        <div class="flex-1 overflow-y-auto p-3 space-y-2">
+        <div class="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           @for (config of nodeTypes; track config.type) {
             <div
               draggable="true"
               (dragstart)="onDragStart($event, config.type)"
-              class="rounded-lg p-3 cursor-grab hover:bg-gray-800 transition-colors select-none"
-              [style.borderLeft]="'3px solid ' + config.color">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-lg">{{ getEmoji(config.icon) }}</span>
-                <span class="text-sm font-medium text-white">{{ config.label }}</span>
+              class="rounded-lg p-2.5 cursor-grab hover:bg-gray-800/70 transition-all duration-150 select-none border border-transparent hover:border-gray-700/50"
+              [style.borderLeft]="'3px solid ' + config.color + ' !important'">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-base">{{ getEmoji(config.icon) }}</span>
+                <span class="text-sm font-medium text-gray-100">{{ config.label }}</span>
               </div>
-              <p class="text-xs text-gray-400 leading-tight">{{ config.description }}</p>
+              <p class="text-xs text-gray-500 leading-snug pl-7">{{ config.description }}</p>
             </div>
           }
         </div>

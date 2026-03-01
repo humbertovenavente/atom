@@ -93,6 +93,7 @@ export interface FlowNode {
   id: string;
   type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool';
   position: { x: number; y: number };
+  size?: { width: number; height: number };
   data: {
     label: string;
     icon: string;

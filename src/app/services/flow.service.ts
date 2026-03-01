@@ -67,6 +67,24 @@ export class FlowService {
     this.edges.update((edges) => [...edges, edge]);
   }
 
+  removeEdge(edgeId: string): void {
+    this.edges.update((edges) => edges.filter((e) => e.id !== edgeId));
+  }
+
+  updateNodeSize(id: string, size: { width: number; height: number }): void {
+    this.nodes.update((nodes) =>
+      nodes.map((node) => (node.id === id ? { ...node, size } : node))
+    );
+  }
+
+  updateNodeLabel(nodeId: string, label: string): void {
+    this.nodes.update((nodes) =>
+      nodes.map((n) =>
+        n.id === nodeId ? { ...n, data: { ...n.data, label } } : n
+      )
+    );
+  }
+
   updateNodeConfig(nodeId: string, patch: Partial<NodeConfig>): void {
     this.nodes.update((nodes) =>
       nodes.map((n) =>

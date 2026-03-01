@@ -9,13 +9,13 @@ import { FlowToolbarComponent } from '../components/flow-toolbar/flow-toolbar.co
   standalone: true,
   imports: [SidebarComponent, CanvasComponent, ChatComponent, FlowToolbarComponent],
   template: `
-    <div class="grid h-screen" style="grid-template-columns: 240px 1fr 360px;">
-      <app-sidebar />
-      <div class="flex flex-col overflow-hidden">
-        <app-flow-toolbar />
-        <app-canvas class="flex-1" />
+    <div class="grid h-screen overflow-hidden" style="grid-template-columns: 240px 1fr 360px; grid-template-rows: 1fr;">
+      <app-sidebar class="overflow-hidden" />
+      <div class="flex flex-col overflow-hidden min-h-0 bg-[#0F172A]">
+        <app-flow-toolbar class="flex-shrink-0" />
+        <app-canvas class="flex-1 min-h-0" />
       </div>
-      <app-chat />
+      <app-chat class="overflow-hidden" />
     </div>
   `,
 })

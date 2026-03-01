@@ -15,6 +15,12 @@ const AGENT_NODE_MAP: Record<string, string> = {
   generic: 'generic-1',
 };
 
+export interface SessionSummary {
+  sessionId: string;
+  preview: string;
+  updatedAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private readonly flowService = inject(FlowService);
@@ -22,6 +28,7 @@ export class ChatService {
   readonly messages = signal<ChatMessage[]>([]);
   readonly isStreaming = signal(false);
   readonly sessionId = signal<string | null>(null);
+  readonly sessionHistory = signal<SessionSummary[]>([]);
 
   async sendMessage(userText: string): Promise<void> {
     // Guard: prevent double-send while streaming
@@ -88,7 +95,7 @@ export class ChatService {
         if (last?.role === 'assistant' && last.content === '') {
           return [
             ...msgs.slice(0, -1),
-            { ...last, content: 'Error al procesar tu mensaje' },
+            { ...last, content: 'Error processing your message' },
           ];
         }
         return msgs;
@@ -142,7 +149,7 @@ export class ChatService {
           if (lastIndex >= 0 && msgs[lastIndex].role === 'assistant' && msgs[lastIndex].content === '') {
             const updated = {
               ...msgs[lastIndex],
-              content: parsed.message ?? 'Error al procesar tu mensaje',
+              content: parsed.message ?? 'Error processing your message',
             };
             return [...msgs.slice(0, lastIndex), updated];
           }
@@ -176,5 +183,21 @@ export class ChatService {
     this.messages.set([]);
     this.sessionId.set(null);
     localStorage.removeItem('chat_session_id');
+  }
+
+  async fetchSessionHistory(): Promise<void> {
+    try {
+      const res = await fetch('/api/sessions');
+      if (!res.ok) return;
+      const data: SessionSummary[] = await res.json();
+      this.sessionHistory.set(data);
+    } catch {
+      // Silently fail — history is non-critical
+    }
+  }
+
+  async switchToSession(sessionId: string): Promise<void> {
+    await this.loadSession(sessionId);
+    localStorage.setItem('chat_session_id', sessionId);
   }
 }

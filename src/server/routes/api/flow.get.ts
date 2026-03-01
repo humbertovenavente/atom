@@ -9,7 +9,7 @@ const nodes: FlowNode[] = [
     type: 'orchestrator',
     position: { x: 80, y: 300 },
     data: {
-      label: 'Orquestador',
+      label: 'Orchestrator',
       icon: 'target',
       color: '#3B82F6',
     },
@@ -19,7 +19,7 @@ const nodes: FlowNode[] = [
     type: 'memory',
     position: { x: 320, y: 100 },
     data: {
-      label: 'Memoria',
+      label: 'Memory',
       icon: 'brain',
       color: '#8B5CF6',
     },
@@ -29,7 +29,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 260 },
     data: {
-      label: 'Especialista FAQs',
+      label: 'FAQ Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -39,7 +39,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 380 },
     data: {
-      label: 'Especialista Catálogo',
+      label: 'Catalog Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -49,7 +49,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 500 },
     data: {
-      label: 'Especialista Agenda',
+      label: 'Schedule Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -59,7 +59,7 @@ const nodes: FlowNode[] = [
     type: 'tool',
     position: { x: 560, y: 100 },
     data: {
-      label: 'Herramienta Búsqueda',
+      label: 'Search Tool',
       icon: 'tool',
       color: '#EF4444',
     },
@@ -69,7 +69,7 @@ const nodes: FlowNode[] = [
     type: 'validator',
     position: { x: 560, y: 320 },
     data: {
-      label: 'Validador',
+      label: 'Validator',
       icon: 'check-circle',
       color: '#10B981',
     },
@@ -79,7 +79,7 @@ const nodes: FlowNode[] = [
     type: 'generic',
     position: { x: 800, y: 300 },
     data: {
-      label: 'Genérico',
+      label: 'Generic',
       icon: 'message-circle',
       color: '#6B7280',
     },
