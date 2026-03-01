@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 4 of 4 (Chat & SSE Integration)
-Plan: 2 of 2 in current phase (04-02 complete — PHASE COMPLETE)
+Phase: 3 of 4 (Data & Backend — gap closure complete)
+Plan: 4 of 4 in current phase (03-04 complete — PHASE COMPLETE)
 Status: Complete
-Last activity: 2026-03-01 — Plan 04-02 complete (ChatComponent UI with streaming, markdown, session restore)
+Last activity: 2026-03-01 — Plan 03-04 complete (seed.ts English field names, faq_vector_index, GET /api/faq)
 
 Progress: [██████████] 100%
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100%
 | Phase 04-chat-sse-integration P01 | 2 | 2 tasks | 4 files |
 | Phase 04 P02 | 5min | 2 tasks | 2 files |
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
+| Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 03-data-backend]: VectorSearchService uses LLM_API_KEY, faq_vector_index, default limit 3, and .find() fallback for empty aggregate results
 - [Phase 03-data-backend]: Session GET returns empty object for unknown sessionId — not 404
 - [Phase 03-data-backend]: Static data directory deleted; jsons/ at project root remains as authoritative seed source
+- [03-04]: seed.ts uses LLM_API_KEY (not GEMINI_API_KEY) — single canonical env var for all LLM/embedding operations
+- [03-04]: faq_vector_index is the canonical Atlas index name — seed and VectorSearchService now consistent
+- [03-04]: GET /api/faq follows vehicles.get.ts pattern — no filtering, embedding: 0 projection, lean()
 
 ### Pending Todos
 
@@ -113,5 +117,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 04-02-PLAN.md (ChatComponent UI — Phase 4 complete, all phases done)
+Stopped at: Completed 03-04-PLAN.md (seed.ts gap closure + GET /api/faq — Phase 3 fully complete)
 Resume file: None
