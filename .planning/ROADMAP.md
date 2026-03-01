@@ -29,10 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Validation state (collected fields, intent) survives across multiple turns for the same sessionId without data loss
   4. Static JSON files (faqs.json, catalog.json, schedule.json) load at startup and are accessible without per-request disk I/O
   5. All shared TypeScript types (ChatRequest, ChatMessage, AgentType, SSEEvent, etc.) exist and compile without errors
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Scaffold Analog.js project, shared TypeScript types, SSE emitter + POST /api/chat mock endpoint
+- [ ] 01-02-PLAN.md — MongoDB connection + memory service, static JSON data, wire into chat endpoint, deploy verification
 
 ### Phase 2: Orchestrator + Generic
 **Goal**: User intent is correctly classified and routed; greetings and off-topic messages return a streaming conversational response end-to-end
@@ -86,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/TBD | Not started | - |
+| 1. Infrastructure | 0/2 | Not started | - |
 | 2. Orchestrator + Generic | 0/TBD | Not started | - |
 | 3. Validators + Specialists + Flow | 0/TBD | Not started | - |
 | 4. Differentiators | 0/TBD | Not started | - |
