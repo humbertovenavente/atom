@@ -22,7 +22,9 @@ export class FlowService {
     this.http.get<FlowResponse>('/api/flow').subscribe({
       next: (response) => {
         this.nodes.set(response.nodes);
-        this.edges.set(response.edges);
+        // Filter out edges with missing source/target to prevent foblex crashes
+        const validEdges = response.edges.filter(e => e.source && e.target);
+        this.edges.set(validEdges);
       },
       error: (err) => {
         console.error('Failed to load default flow:', err);
