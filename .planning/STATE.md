@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T23:34:03.250Z"
+last_updated: "2026-03-01T23:49:33.775Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 4
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Project State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 6 of 6 (Fix Appointment Booking Persistence Bug)
-Plan: 2 of 2 in current phase (06-02 complete — Phase 6 DONE)
-Status: Complete
-Last activity: 2026-03-01 — Plan 06-02 complete (fields-first booking guard, real slot injection, booking SSE events — all 4 human tests passed)
+Phase: 7 of 7 (UI Improvements — Light Mode, Theme Toggle, Lighter Dark Theme, i18n)
+Plan: 1 of 3 in current phase (07-01 complete — theme system with CSS variables)
+Status: In Progress
+Last activity: 2026-03-01 — Plan 07-01 complete (CSS variables, ThemeService, all 6 components updated — theme toggle functional)
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
 | Phase 06-fix-appointment-booking-persistence-bug P02 | 15min | 2 tasks | 1 files |
+| Phase 07-ui-improvements P01 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -116,10 +117,12 @@ Recent decisions affecting current work:
 - [Phase 06-02]: Fields-first booking guard: check data presence (fullName+preferredDate+preferredTime) not intent label — eliminates silent booking failures when LLM reclassifies final message
 - [Phase 06-02]: effectiveIntent overrides raw classified intent when all booking fields present — specialist prompt, re-validation, and memory all use the corrected scheduling intent
 - [Phase 06-02]: Proactive getAvailableSlots() fetched before LLM call and injected into buildSpecialistPrompt via new availableSlots param — prevents specialist LLM from inventing fake availability
+- [Phase 07-01]: CSS custom properties via [data-theme] attribute on documentElement; ThemeService uses Angular signal + effect(); inline style bindings chosen over Tailwind custom tokens (no config file)
 
 ### Roadmap Evolution
 
 - Phase 6 added: Fix appointment booking persistence bug
+- Phase 7 added: UI improvements - light mode, theme toggle, lighter dark theme, i18n English/Spanish
 
 ### Pending Todos
 
@@ -133,5 +136,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06-02-PLAN.md (fields-first booking guard and real slot injection — Phase 6 complete, all plans done)
+Stopped at: Completed 07-01-PLAN.md (theme CSS variables, ThemeService, all 6 components updated — Phase 7 Plan 1 done)
 Resume file: None

@@ -109,3 +109,27 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 Plans:
 - [ ] 06-01-PLAN.md — Type contracts, export getAvailableSlots, add booking node to flow pipeline
 - [ ] 06-02-PLAN.md — Fields-first booking guard, proactive slot injection, effectiveIntent in chat.post.ts + human verification
+
+### Phase 7: UI improvements - light mode, theme toggle, lighter dark theme, i18n English/Spanish
+
+**Goal:** Replace pitch-black dark theme with lighter blue-gray tones, add a complete light mode, provide a theme toggle button, and add i18n support for English/Spanish with a language toggle
+**Requirements**: UI-01, UI-02, UI-03, UI-04
+**Depends on:** Phase 6
+**Success Criteria** (what must be TRUE):
+  1. Dark theme uses lighter backgrounds (#1a2332, #243044) and visible borders instead of pitch black (#0F172A, #1F2937)
+  2. Light mode renders with white/light gray backgrounds, dark text, and proper contrast
+  3. Theme toggle button in toolbar switches between dark and light mode, persists in localStorage
+  4. Language toggle in toolbar switches all UI text between English and Spanish, persists in localStorage
+  5. All components (sidebar, canvas, chat, toolbar, config panel, nodes) respect both theme and language
+**Plans:** 1/3 plans executed
+
+**Requirement details:**
+- **UI-01**: Lighter dark theme — replace pitch-black backgrounds with blue-gray tones, make borders visible
+- **UI-02**: Complete light mode — white/light gray backgrounds, dark text, proper contrast for all components
+- **UI-03**: Theme toggle — button in toolbar to switch dark/light, preference persists in localStorage
+- **UI-04**: i18n English/Spanish — all UI text translatable, language toggle in toolbar, preference persists
+
+Plans:
+- [ ] 07-01-PLAN.md — CSS variable theming infrastructure + ThemeService + apply to all components + toggle button
+- [ ] 07-02-PLAN.md — I18nService with EN/ES dictionaries + apply translations to all component templates + language toggle
+- [ ] 07-03-PLAN.md — Human verification checkpoint for both themes and both languages
