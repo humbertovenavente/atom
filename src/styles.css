@@ -219,6 +219,18 @@ f-canvas,
   backdrop-filter: blur(8px) !important;
 }
 
+.canvas-minimap .f-minimap-node {
+  fill: rgba(99, 131, 255, 0.5);
+  rx: 4;
+  ry: 4;
+}
+
+.canvas-minimap .f-minimap-view {
+  fill: rgba(59, 130, 246, 0.08);
+  stroke: rgba(59, 130, 246, 0.4) !important;
+  stroke-width: 1;
+}
+
 /* Typing indicator (three bouncing dots) */
 .typing-indicator {
   display: flex;
