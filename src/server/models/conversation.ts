@@ -17,8 +17,8 @@ const conversationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// TTL index: auto-delete conversations after 7 days of inactivity (604800 seconds)
-conversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 604800 });
+// TTL index: auto-delete conversations after 24 hours of inactivity (86400 seconds)
+conversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
 
 export const Conversation =
   mongoose.models['Conversation'] ||

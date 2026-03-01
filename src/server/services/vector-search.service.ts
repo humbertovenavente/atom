@@ -8,9 +8,9 @@ let genaiClient: GoogleGenAI | null = null;
 
 function getGenAI(): GoogleGenAI {
   if (!genaiClient) {
-    const apiKey = process.env['GEMINI_API_KEY'];
+    const apiKey = process.env['LLM_API_KEY'];
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set');
+      throw new Error('LLM_API_KEY environment variable is not set');
     }
     genaiClient = new GoogleGenAI({ apiKey });
   }
@@ -27,10 +27,10 @@ async function embedQuery(text: string): Promise<number[]> {
 }
 
 export const vectorSearchService = {
-  async searchVehicles(query: string, limit = 5): Promise<unknown[]> {
+  async searchVehicles(query: string, limit = 3): Promise<unknown[]> {
     await connectDB();
     const queryVector = await embedQuery(query);
-    return Vehicle.aggregate([
+    const results = await Vehicle.aggregate([
       {
         $vectorSearch: {
           index: 'vehicles_vector_index',
@@ -47,15 +47,19 @@ export const vectorSearchService = {
         },
       },
     ]);
+    if (results.length === 0) {
+      return Vehicle.find({}, { embedding: 0 }).sort({ price: 1 }).limit(limit).lean();
+    }
+    return results;
   },
 
-  async searchFAQs(query: string, limit = 5): Promise<unknown[]> {
+  async searchFAQs(query: string, limit = 3): Promise<unknown[]> {
     await connectDB();
     const queryVector = await embedQuery(query);
-    return FAQ.aggregate([
+    const results = await FAQ.aggregate([
       {
         $vectorSearch: {
-          index: 'faqs_vector_index',
+          index: 'faq_vector_index',
           path: 'embedding',
           queryVector,
           numCandidates: limit * 10,
@@ -69,5 +73,9 @@ export const vectorSearchService = {
         },
       },
     ]);
+    if (results.length === 0) {
+      return FAQ.find({}, { embedding: 0 }).sort({ category: 1, originalId: 1 }).limit(limit).lean();
+    }
+    return results;
   },
 };

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const faqSchema = new mongoose.Schema({
-  categoria: { type: String, required: true, index: true },
-  pregunta: { type: String, required: true },
-  respuesta: { type: String, required: true },
-  faqId: { type: Number, required: true },
+  category: { type: String, required: true, index: true },
+  question: { type: String, required: true },
+  answer: { type: String, required: true },
+  originalId: { type: Number, required: true },
   embedding: { type: [Number], required: true },
 });
 
