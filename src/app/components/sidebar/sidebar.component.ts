@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FlowService } from '../../services/flow.service';
 import { NodeConfigPanelComponent } from '../node-config-panel/node-config-panel.component';
+import { I18nService } from '../../services/i18n.service';
 
 interface NodeTypeConfig {
   type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool';
@@ -40,7 +41,7 @@ const EMOJI_MAP: Record<string, string> = {
       <div class="h-full flex flex-col border-r"
         style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
         <div class="px-4 py-3 border-b" style="border-color: var(--border-primary);">
-          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">Nodes</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">{{ i18n.t('sidebar.nodes') }}</h2>
         </div>
         <div class="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           @for (config of nodeTypes; track config.type) {
@@ -51,9 +52,9 @@ const EMOJI_MAP: Record<string, string> = {
               [style.borderLeft]="'3px solid ' + config.color + ' !important'">
               <div class="flex items-center gap-2 mb-0.5">
                 <span class="text-base">{{ getEmoji(config.icon) }}</span>
-                <span class="text-sm font-medium" style="color: var(--text-primary);">{{ config.label }}</span>
+                <span class="text-sm font-medium" style="color: var(--text-primary);">{{ getLabel(config) }}</span>
               </div>
-              <p class="text-xs leading-snug pl-7" style="color: var(--text-tertiary);">{{ config.description }}</p>
+              <p class="text-xs leading-snug pl-7" style="color: var(--text-tertiary);">{{ getDescription(config) }}</p>
             </div>
           }
         </div>
@@ -63,10 +64,21 @@ const EMOJI_MAP: Record<string, string> = {
 })
 export class SidebarComponent {
   readonly flowService = inject(FlowService);
+  readonly i18n = inject(I18nService);
   readonly nodeTypes = NODE_TYPE_CONFIGS;
 
   getEmoji(iconName: string): string {
     return EMOJI_MAP[iconName] ?? '📦';
+  }
+
+  getLabel(config: NodeTypeConfig): string {
+    const key = `sidebar.${config.type}`;
+    return this.i18n.t(key);
+  }
+
+  getDescription(config: NodeTypeConfig): string {
+    const key = `sidebar.${config.type}.desc`;
+    return this.i18n.t(key);
   }
 
   onDragStart(event: DragEvent, nodeType: string): void {

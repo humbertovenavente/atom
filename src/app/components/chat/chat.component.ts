@@ -13,6 +13,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { ChatService } from '../../services/chat.service';
 import { FlowService } from '../../services/flow.service';
+import { I18nService } from '../../services/i18n.service';
 import type { ChatMessage } from '@models/types';
 
 const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
@@ -33,7 +34,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
       <!-- Header -->
       <div class="px-4 py-3 border-b flex-shrink-0 flex items-center justify-between" style="border-color: var(--border-primary);">
         <div class="flex items-center gap-2">
-          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">Chat</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">{{ i18n.t('chat.title') }}</h2>
           <button (click)="toggleHistory()"
             class="transition-colors"
             style="color: var(--text-tertiary);"
@@ -48,7 +49,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
         <button (click)="newConversation()"
           class="text-xs px-2.5 py-1 rounded-md transition-all duration-150"
           style="border: 1px solid var(--border-primary); color: var(--text-secondary);">
-          New Conversation
+          {{ i18n.t('chat.newConversation') }}
         </button>
       </div>
 
@@ -57,11 +58,11 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
         <div class="flex-1 min-h-0 overflow-y-auto">
           <div class="p-3 space-y-1">
             <div class="flex items-center justify-between mb-2 px-1">
-              <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">History</span>
-              <button (click)="toggleHistory()" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Close</button>
+              <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ i18n.t('chat.history') }}</span>
+              <button (click)="toggleHistory()" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">{{ i18n.t('chat.close') }}</button>
             </div>
             @if (chat.sessionHistory().length === 0) {
-              <p class="text-xs text-gray-500 text-center py-6">No previous conversations</p>
+              <p class="text-xs text-gray-500 text-center py-6">{{ i18n.t('chat.noHistory') }}</p>
             }
             @for (session of chat.sessionHistory(); track session.sessionId) {
               <div class="group relative">
@@ -123,10 +124,10 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
           @if (chat.messages().length === 0 && !chat.isStreaming()) {
             <div class="flex flex-col items-center gap-5 py-10">
               <p class="text-sm text-center max-w-[260px] leading-relaxed" style="color: var(--text-secondary);">
-                Hi! I'm your Volkswagen assistant. How can I help you today?
+                {{ i18n.t('chat.welcome') }}
               </p>
               <div class="flex flex-col gap-2 w-full max-w-[260px]">
-                @for (chip of suggestionChips; track chip) {
+                @for (chip of translatedChips; track chip) {
                   <button
                     (click)="fillInput(chip)"
                     class="text-left text-sm rounded-lg px-3 py-2.5 transition-all duration-150 theme-hover"
@@ -185,7 +186,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
             [(ngModel)]="inputText"
             (keydown)="onKeydown($event)"
             [disabled]="chat.isStreaming()"
-            placeholder="Type your message..."
+            [placeholder]="i18n.t('chat.placeholder')"
             class="flex-1 text-sm rounded-lg px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-blue-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
           />
@@ -193,7 +194,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
             (click)="send()"
             [disabled]="chat.isStreaming() || !inputText.trim()"
             class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-all duration-150 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
-            Send
+            {{ i18n.t('chat.send') }}
           </button>
         </div>
       }
@@ -204,6 +205,7 @@ export class ChatComponent {
   readonly chat = inject(ChatService);
   private readonly flowService = inject(FlowService);
   private readonly sanitizer = inject(DomSanitizer);
+  readonly i18n = inject(I18nService);
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
 
@@ -213,12 +215,14 @@ export class ChatComponent {
   readonly editingSessionId = signal<string | null>(null);
   editingTitle = '';
 
-  readonly suggestionChips = [
-    'Browse car catalog',
-    'Schedule an appointment',
-    'Frequently asked questions',
-    'Financing options',
-  ];
+  get translatedChips(): string[] {
+    return [
+      this.i18n.t('chat.chip.catalog'),
+      this.i18n.t('chat.chip.schedule'),
+      this.i18n.t('chat.chip.faq'),
+      this.i18n.t('chat.chip.financing'),
+    ];
+  }
 
   constructor() {
     effect(() => {
@@ -336,12 +340,12 @@ export class ChatComponent {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1) return this.i18n.t('chat.justNow');
+    if (diffMins < 60) return `${diffMins}${this.i18n.t('chat.mAgo')}`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 24) return `${diffHours}${this.i18n.t('chat.hAgo')}`;
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffDays < 7) return `${diffDays}${this.i18n.t('chat.dAgo')}`;
+    return date.toLocaleDateString(this.i18n.locale() === 'es' ? 'es-MX' : 'en-US', { month: 'short', day: 'numeric' });
   }
 }

@@ -1,6 +1,7 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FlowService } from '../../services/flow.service';
+import { I18nService } from '../../services/i18n.service';
 import type { FlowNode } from '@models/types';
 
 const EMOJI_MAP: Record<string, string> = {
@@ -58,7 +59,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         <!-- System Prompt -->
         <div>
           <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
-            System Prompt
+            {{ i18n.t('config.systemPrompt') }}
           </label>
           <textarea
             [value]="currentPrompt()"
@@ -66,14 +67,14 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             rows="8"
             class="w-full text-sm rounded-lg p-3 outline-none focus:border-blue-500 resize-none leading-relaxed"
             style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
-            placeholder="System instructions for this agent...">
+            [placeholder]="i18n.t('config.promptPlaceholder')">
           </textarea>
         </div>
 
         <!-- Temperature -->
         <div>
           <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
-            Temperature: {{ currentTemp() }}
+            {{ i18n.t('config.temperature') }}: {{ currentTemp() }}
           </label>
           <input
             type="range"
@@ -84,8 +85,8 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             (input)="onTempChange($event)"
             class="w-full accent-blue-500" />
           <div class="flex justify-between text-xs mt-1" style="color: var(--text-tertiary);">
-            <span>0 (precise)</span>
-            <span>2 (creative)</span>
+            <span>{{ i18n.t('config.precise') }}</span>
+            <span>{{ i18n.t('config.creative') }}</span>
           </div>
         </div>
 
@@ -94,7 +95,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
           <button
             (click)="deleteNode()"
             class="w-full text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-2 transition-all duration-150">
-            Delete Node
+            {{ i18n.t('config.deleteNode') }}
           </button>
         </div>
       </div>
@@ -104,6 +105,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
 export class NodeConfigPanelComponent {
   readonly nodeId = input.required<string>();
   private readonly flowService = inject(FlowService);
+  readonly i18n = inject(I18nService);
 
   readonly node = computed<FlowNode | undefined>(() =>
     this.flowService.nodes().find((n) => n.id === this.nodeId())
@@ -133,7 +135,7 @@ export class NodeConfigPanelComponent {
   }
 
   deleteNode(): void {
-    if (window.confirm('Delete this node?')) {
+    if (window.confirm(this.i18n.t('config.deleteConfirm'))) {
       this.flowService.setSelectedNode(null);
       this.flowService.removeNode(this.nodeId());
     }
