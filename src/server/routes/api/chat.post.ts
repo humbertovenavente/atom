@@ -2,16 +2,11 @@ import { defineEventHandler, readBody, setHeader } from 'h3';
 import { createEmitter } from '../../sse/emitter';
 import type { ChatRequest } from '../../../shared/types';
 import { memoryService } from '../../memory/memory.service';
-import { faqsData, catalogData, scheduleData } from '../../data/loader';
+import { vectorSearchService } from '../../services/vector-search.service';
 
 export const config = {
   maxDuration: 60,
 };
-
-// Verify static data loaded at module init time (logged once on first request)
-console.log(
-  `Data loaded: ${(faqsData as unknown[]).length} FAQs, ${(catalogData as unknown[]).length} vehicles, ${(scheduleData as { advisors: unknown[] }).advisors.length} advisors`
-);
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<ChatRequest>(event);
@@ -33,15 +28,35 @@ export default defineEventHandler(async (event) => {
     const memory = await memoryService.load(sessionId);
     emit('agent_active', { node: 'memory', status: 'complete' });
 
-    // b) Simulate orchestrator processing
+    // b) Orchestrator: fetch live context from MongoDB via VectorSearchService
     emit('agent_active', { node: 'orchestrator', status: 'processing' });
-    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const [vehicles, faqs] = await Promise.all([
+      vectorSearchService.searchVehicles(message, 3),
+      vectorSearchService.searchFAQs(message, 3),
+    ]);
+
+    const systemPrompt = [
+      'Eres un asistente experto de agencia de autos.',
+      '',
+      'CONTEXTO - Vehículos relevantes:',
+      JSON.stringify(vehicles, null, 2),
+      '',
+      'CONTEXTO - Preguntas frecuentes relevantes:',
+      JSON.stringify(faqs, null, 2),
+      '',
+      'Responde basándote en esta información. Si no tienes información suficiente, dilo honestamente.',
+    ].join('\n');
+
     emit('agent_active', { node: 'orchestrator', status: 'complete' });
 
     // c) Build mock response with turn count from memory history
     // Each turn adds 2 messages (user + assistant), so turn number = (messages.length / 2) + 1
     const turnNumber = Math.floor(memory.messages.length / 2) + 1;
-    const mockResponse = `Hola! Recibí tu mensaje: "${message}". Este es el turno #${turnNumber} de tu conversación. (Respuesta simulada — Fase 1)`;
+    const mockResponse = `[Contexto: ${(vehicles as unknown[]).length} vehículos, ${(faqs as unknown[]).length} FAQs] Turno #${turnNumber}: "${message}" (Fase 3 — LLM real en Fase 4)`;
+
+    // systemPrompt will be used by Phase 4 LLM call — referenced here to avoid unused var warning
+    void systemPrompt;
 
     emit('message_chunk', { content: mockResponse });
 
