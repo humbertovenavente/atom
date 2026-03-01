@@ -11,7 +11,9 @@ const AGENT_NODE_MAP: Record<string, string> = {
   memory: 'memory-1',
   orchestrator: 'orchestrator-1',
   validator: 'validator-1',
-  specialist: 'specialist-faqs',
+  'specialist-faqs': 'specialist-faqs',
+  'specialist-catalog': 'specialist-catalog',
+  'specialist-schedule': 'specialist-schedule',
   generic: 'generic-1',
 };
 

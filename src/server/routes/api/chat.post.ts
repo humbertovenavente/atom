@@ -168,7 +168,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // Step 4: Specialist — vector context + streaming LLM response
-    emit('agent_active', { node: 'specialist', status: 'processing' });
+    const specialistNode = intent === 'generic' ? 'generic' : `specialist-${intent}`;
+    emit('agent_active', { node: specialistNode, status: 'processing' });
     const [vehicles, faqs] = await Promise.all([
       vectorSearchService.searchVehicles(message, 3),
       vectorSearchService.searchFAQs(message, 3),
@@ -196,7 +197,7 @@ export default defineEventHandler(async (event) => {
         fullResponse += content;
       }
     }
-    emit('agent_active', { node: 'specialist', status: 'complete' });
+    emit('agent_active', { node: specialistNode, status: 'complete' });
 
     // Save turn to MongoDB with intent, merged validationData, and agentType
     emit('agent_active', { node: 'memory', status: 'processing' });
