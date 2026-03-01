@@ -65,6 +65,16 @@ const nodes: FlowNode[] = [
     },
   },
   {
+    id: 'booking',
+    type: 'tool',
+    position: { x: 560, y: 500 },
+    data: {
+      label: 'Booking',
+      icon: 'calendar',
+      color: '#10B981',
+    },
+  },
+  {
     id: 'validator-1',
     type: 'validator',
     position: { x: 560, y: 320 },
@@ -127,6 +137,12 @@ const edges: FlowEdge[] = [
     id: 'edge-schedule-validator',
     source: 'specialist-schedule',
     target: 'validator-1',
+    animated: false,
+  },
+  {
+    id: 'edge-schedule-booking',
+    source: 'specialist-schedule',
+    target: 'booking',
     animated: false,
   },
   {
