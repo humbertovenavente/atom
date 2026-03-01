@@ -11,16 +11,16 @@ Requirements for hackathon demo. Each maps to roadmap phases.
 
 - [x] **INFRA-01**: POST /api/chat endpoint accepts sessionId + message and returns SSE event stream
 - [x] **INFRA-02**: SSE emits typed events: agent_active, message_chunk, validation_update, done, error
-- [ ] **INFRA-03**: MongoDB Atlas connection with cached singleton pattern for serverless
-- [ ] **INFRA-04**: Static JSON data files loaded and accessible to specialist agents (faqs.json, catalog.json, schedule.json)
+- [x] **INFRA-03**: MongoDB Atlas connection with cached singleton pattern for serverless
+- [x] **INFRA-04**: Static JSON data files loaded and accessible to specialist agents (faqs.json, catalog.json, schedule.json)
 - [x] **INFRA-05**: TypeScript interfaces for all shared types (ChatRequest, ChatMessage, AgentType, FlowConfig, SSEEvent, etc.)
 
 ### Memory
 
-- [ ] **MEM-01**: Memory service reads conversation history + validation state from MongoDB by sessionId
-- [ ] **MEM-02**: Memory service writes user message, assistant response, intent, and validation data after each turn
+- [x] **MEM-01**: Memory service reads conversation history + validation state from MongoDB by sessionId
+- [x] **MEM-02**: Memory service writes user message, assistant response, intent, and validation data after each turn
 - [ ] **MEM-03**: Conversations persist across browser sessions (bonus: +5 pts) — same sessionId retrieves full history
-- [ ] **MEM-04**: Validation state (collected fields, current intent) persists across turns without loss
+- [x] **MEM-04**: Validation state (collected fields, current intent) persists across turns without loss
 
 ### Orchestrator
 
@@ -105,12 +105,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
-| MEM-01 | Phase 1 | Pending |
-| MEM-02 | Phase 1 | Pending |
-| MEM-04 | Phase 1 | Pending |
+| MEM-01 | Phase 1 | Complete |
+| MEM-02 | Phase 1 | Complete |
+| MEM-04 | Phase 1 | Complete |
 | ORCH-01 | Phase 2 | Pending |
 | ORCH-02 | Phase 2 | Pending |
 | ORCH-03 | Phase 2 | Pending |

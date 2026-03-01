@@ -12,7 +12,7 @@ Build a multi-agent AI chatbot backend for a car dealership hackathon demo in 18
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Infrastructure** - SSE streaming + MongoDB proven on a live Vercel Preview URL (hard gate)
+- [x] **Phase 1: Infrastructure** - SSE streaming + MongoDB proven on a live Vercel Preview URL (hard gate) (completed 2026-03-01)
 - [ ] **Phase 2: Orchestrator + Generic** - Intent classification routing to all 4 paths with end-to-end generic agent streaming
 - [ ] **Phase 3: Validators + Specialists + Flow** - All 3 use cases end-to-end with full validator/specialist pipeline and editor config persistence
 - [ ] **Phase 4: Differentiators** - Bonus features: cross-session memory persistence, RAG for FAQs, pipeline consumes saved node configs
@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/2 | Not started | - |
+| 1. Infrastructure | 2/2 | Complete   | 2026-03-01 |
 | 2. Orchestrator + Generic | 0/TBD | Not started | - |
 | 3. Validators + Specialists + Flow | 0/TBD | Not started | - |
 | 4. Differentiators | 0/TBD | Not started | - |
