@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const nodeConfigSchema = new mongoose.Schema({
   systemPrompt: { type: String, default: '' },
-  temperature: { type: Number, default: 0.7 },
+  temperature: { type: Number, default: 0.3 },
 }, { _id: false });
 
 const flowNodeSchema = new mongoose.Schema({

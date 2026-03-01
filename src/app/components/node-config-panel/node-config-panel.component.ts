@@ -54,20 +54,6 @@ const DEFAULT_PROMPTS: Record<string, string> = {
 
       <!-- Form body -->
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        <!-- Node Label -->
-        <div>
-          <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
-            Node Name
-          </label>
-          <input
-            type="text"
-            [value]="nodeLabel()"
-            (input)="onLabelChange($event)"
-            class="w-full bg-gray-800 text-white text-sm rounded-lg p-2.5 border border-gray-600 outline-none focus:border-blue-500 transition-colors"
-            placeholder="Node name..."
-          />
-        </div>
-
         <!-- System Prompt -->
         <div>
           <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">

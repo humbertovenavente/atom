@@ -146,8 +146,15 @@ export default defineEventHandler(async (event) => {
       await connectDB();
       const saved = await Flow.findOne({ flowId: 'default' }).lean();
       if (saved) {
+        // Normalize: reset temperature from old 0.7 default to 0.3
+        const normalizedNodes = (saved.nodes as any[]).map((n: any) => {
+          if (n.data?.config?.temperature === 0.7) {
+            return { ...n, data: { ...n.data, config: { ...n.data.config, temperature: 0.3 } } };
+          }
+          return n;
+        });
         return {
-          nodes: saved.nodes,
+          nodes: normalizedNodes,
           edges: saved.edges,
           nodeConfigs: saved.nodeConfigs ?? {},
         };
