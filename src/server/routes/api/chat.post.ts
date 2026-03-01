@@ -1,9 +1,10 @@
 import { GoogleGenAI } from '@google/genai';
 import { defineEventHandler, readBody, setHeader } from 'h3';
 import { createEmitter } from '../../sse/emitter';
-import type { ChatRequest, OrchestratorResult, ValidatorResult } from '../../../shared/types';
+import type { ChatRequest, OrchestratorResult, ValidatorResult, BookingResult } from '../../../shared/types';
 import { memoryService } from '../../memory/memory.service';
 import { vectorSearchService } from '../../services/vector-search.service';
+import { appointmentService, getAvailableSlots } from '../../services/appointment.service';
 
 export const config = {
   maxDuration: 60,
@@ -21,17 +22,29 @@ function getGenAI(): GoogleGenAI {
 }
 const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.5-flash';
 
-// Orchestrator system prompt and intent classification helper
-const ORCHESTRATOR_SYSTEM = `Eres un clasificador de intenciones para un asistente de agencia de autos.
+// Orchestrator system prompt — built dynamically to inject current date
+function buildOrchestratorPrompt(): string {
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const dayName = dayNames[now.getDay()];
+
+  return `Eres un clasificador de intenciones para un asistente de agencia de autos.
 Clasifica el mensaje del usuario en exactamente una de estas categorías:
 - "catalog": el usuario quiere ver vehículos, precios, o comparar modelos
 - "schedule": el usuario quiere agendar una cita, prueba de manejo, o visita
 - "faqs": el usuario tiene preguntas sobre financiamiento, garantías, políticas, o información general
 - "generic": cualquier otra consulta
 
+FECHA ACTUAL: Hoy es ${dayName} ${dateStr}. Usa esta fecha para resolver "mañana", "el viernes", "la próxima semana", etc.
+
 Analiza también si el usuario está proporcionando datos de campo (nombre, fecha, hora, presupuesto, tipo de vehículo).
+IMPORTANTE para "preferredTime": siempre usa formato 24 horas HH:mm (ejemplo: "15:00", "09:00"). Convierte "3pm" → "15:00", "10am" → "10:00".
+IMPORTANTE para "preferredDate": siempre usa formato YYYY-MM-DD (ejemplo: "2026-03-05"). Resuelve fechas relativas ("mañana", "el lunes") a la fecha real.
+
 Responde SOLO con JSON: {"intent": "<categoría>", "confidence": <0.0-1.0>, "extracted": {"fullName": "...", "preferredDate": "...", "preferredTime": "...", "budget": <número o null>, "vehicleType": "..."}}
 Omite campos extracted que no estén presentes en el mensaje. Usa null para campos numéricos ausentes.`;
+}
 
 async function classifyIntent(
   message: string
@@ -39,7 +52,7 @@ async function classifyIntent(
   const response = await getGenAI().models.generateContent({
     model: MODEL(),
     contents: [{ role: 'user', parts: [{ text: message }] }],
-    config: { systemInstruction: ORCHESTRATOR_SYSTEM },
+    config: { systemInstruction: buildOrchestratorPrompt() },
   });
   try {
     const text = response.text ?? '';
@@ -97,7 +110,9 @@ function buildSpecialistPrompt(
   validationData: Record<string, unknown>,
   intent: string,
   missingFields: string[],
-  isComplete: boolean
+  isComplete: boolean,
+  bookingResult?: BookingResult,
+  availableSlots?: string[]
 ): string {
   // Inject current date so the LLM can resolve "mañana", "el viernes", etc.
   const now = new Date();
@@ -154,8 +169,30 @@ function buildSpecialistPrompt(
       'INSTRUCCIONES PARA AGENDAR CITA:',
       '- Ayuda al cliente a planear su visita de forma natural',
       '- Sugiere horarios disponibles, menciona qué puede esperar en la visita',
-      '- Ve recopilando nombre, fecha y hora a lo largo de la conversación'
+      '- Ve recopilando nombre completo, fecha y hora a lo largo de la conversación',
+      '- PROHIBIDO decir "agendamos", "tu cita está confirmada", "listo, te esperamos" o cualquier frase que implique que la cita ya fue reservada.',
+      '- SOLO el sistema puede confirmar una cita. Tú NO puedes confirmar citas.',
+      '- Mientras falten datos, di cosas como "para agendar necesito..." o "¿a qué hora te gustaría venir?"'
     );
+    // Inject real available slots when scheduling context is active
+    if (availableSlots && availableSlots.length > 0) {
+      lines.push(
+        '',
+        `HORARIOS DISPONIBLES (ÚNICAMENTE estos — NUNCA inventes otros): ${availableSlots.join(', ')}`,
+        'SOLO muestra los horarios de la lista HORARIOS DISPONIBLES. NUNCA inventes horarios.',
+        'Si el usuario no ha elegido hora, muéstrale SOLO estos horarios disponibles.'
+      );
+    } else if (!validationData['preferredDate']) {
+      lines.push(
+        '',
+        'No muestres horarios específicos todavía. Primero pide la fecha al cliente.'
+      );
+    } else {
+      lines.push(
+        '',
+        'No hay horarios disponibles para esa fecha. Sugiere que elija otra fecha.'
+      );
+    }
   } else if (intent === 'faqs') {
     lines.push(
       '',
@@ -166,10 +203,40 @@ function buildSpecialistPrompt(
   }
 
   // When all data is complete, instruct to confirm/proceed
-  if (isComplete && intent === 'schedule') {
+  if (isComplete && intent === 'schedule' && bookingResult) {
+    if (bookingResult.success) {
+      lines.push(
+        '',
+        'LA CITA FUE AGENDADA EXITOSAMENTE EN EL SISTEMA.',
+        'Confirma cálidamente al cliente resumiendo: nombre, fecha y hora reservada.',
+        'NO preguntes si quiere confirmar — la cita YA está confirmada.'
+      );
+    } else {
+      const reasonMessages: Record<string, string> = {
+        date_not_found: 'La fecha solicitada no tiene horarios disponibles.',
+        slot_not_available: 'La hora solicitada no está disponible para esa fecha.',
+        slot_already_booked: 'Esa hora ya fue reservada por otro cliente.',
+        day_fully_booked: 'El día ya tiene todas las citas ocupadas (máximo 4 por día).',
+      };
+      const reason = reasonMessages[bookingResult.reason ?? ''] ?? 'Hubo un problema al reservar.';
+      lines.push(
+        '',
+        `NO SE PUDO AGENDAR LA CITA: ${reason}`
+      );
+      if (bookingResult.availableSlots && bookingResult.availableSlots.length > 0) {
+        lines.push(
+          `HORARIOS DISPONIBLES para esa fecha: ${bookingResult.availableSlots.join(', ')}`,
+          'Muéstrale al cliente estos horarios disponibles y ayúdale a elegir uno.'
+        );
+      } else {
+        lines.push('No hay horarios disponibles para esa fecha. Sugiere otro día.');
+      }
+    }
+  } else if (isComplete && intent === 'schedule') {
+    // Booking already confirmed in a previous turn — just continue naturally
     lines.push(
       '',
-      'TODOS LOS DATOS ESTÁN COMPLETOS. Confirma la cita de forma cálida resumiendo: nombre, fecha y hora. Pregunta si todo está correcto.'
+      'La cita del cliente ya fue agendada previamente. No la vuelvas a confirmar. Solo responde a lo que pregunte.'
     );
   } else if (isComplete && intent === 'catalog') {
     lines.push(
@@ -222,8 +289,62 @@ export default defineEventHandler(async (event) => {
     const validationResult = checkFields(intent, mergedValidationData);
     emit('agent_active', { node: 'validator', status: 'complete' });
 
+    // Step 3.5: Booking — fields-first approach (intent-independent)
+    let bookingResult: BookingResult | undefined;
+    const hasAllBookingFields =
+      !!mergedValidationData['fullName'] &&
+      !!mergedValidationData['preferredDate'] &&
+      !!mergedValidationData['preferredTime'];
+    const isBookingContext = hasAllBookingFields && !mergedValidationData['_bookingConfirmed'];
+
+    // Override intent to 'schedule' when fields-first booking kicks in
+    const effectiveIntent: OrchestratorResult['intent'] = isBookingContext ? 'schedule' : intent;
+
+    console.log('[booking] intent=%s effectiveIntent=%s isBookingContext=%s _bookingConfirmed=%s data=%j',
+      intent, effectiveIntent, isBookingContext, mergedValidationData['_bookingConfirmed'],
+      { fullName: mergedValidationData['fullName'], preferredDate: mergedValidationData['preferredDate'], preferredTime: mergedValidationData['preferredTime'] });
+
+    if (isBookingContext) {
+      emit('agent_active', { node: 'booking', status: 'processing' });
+      const { fullName, preferredDate, preferredTime } = mergedValidationData as Record<string, string>;
+      bookingResult = await appointmentService.bookAppointment(preferredDate, preferredTime, fullName, sessionId);
+      emit('agent_active', { node: 'booking', status: 'complete' });
+      console.log('[booking] result=%j', bookingResult);
+
+      if (bookingResult.success) {
+        mergedValidationData['_bookingConfirmed'] = true;
+        emit('booking_confirmed', {
+          date: bookingResult.booking!.date,
+          time: bookingResult.booking!.time,
+          fullName: bookingResult.booking!.fullName,
+        });
+      } else {
+        // Clear conflicting field to enable retry on next turn
+        if (bookingResult.reason === 'slot_already_booked') {
+          delete mergedValidationData['preferredTime'];
+        } else if (bookingResult.reason === 'day_fully_booked') {
+          delete mergedValidationData['preferredDate'];
+        }
+        emit('booking_failed', {
+          reason: bookingResult.reason,
+          availableSlots: bookingResult.availableSlots ?? [],
+        });
+      }
+    }
+
+    // Re-evaluate validation with effective intent to get correct isComplete/missingFields
+    const effectiveValidationResult = checkFields(effectiveIntent, mergedValidationData);
+
+    // Proactively fetch real available slots when scheduling context is active
+    let availableSlotsForPrompt: string[] = [];
+    const schedulingActive = effectiveIntent === 'schedule';
+    const dateKnown = !!mergedValidationData['preferredDate'];
+    if (schedulingActive && dateKnown && !mergedValidationData['_bookingConfirmed']) {
+      availableSlotsForPrompt = await getAvailableSlots(mergedValidationData['preferredDate'] as string);
+    }
+
     // Step 4: Specialist — always proceed with vector context + streaming LLM response
-    const specialistNode = intent === 'generic' ? 'generic' : `specialist-${intent}`;
+    const specialistNode = effectiveIntent === 'generic' ? 'generic' : `specialist-${effectiveIntent}`;
     emit('agent_active', { node: specialistNode, status: 'processing' });
     const [vehicles, faqs] = await Promise.all([
       vectorSearchService.searchVehicles(message, 3),
@@ -233,9 +354,11 @@ export default defineEventHandler(async (event) => {
       vehicles,
       faqs,
       mergedValidationData,
-      intent,
-      validationResult.missingFields,
-      validationResult.isComplete
+      effectiveIntent,
+      effectiveValidationResult.missingFields,
+      effectiveValidationResult.isComplete,
+      bookingResult,
+      availableSlotsForPrompt
     );
     // Map history to Gemini format (assistant → model, skip system messages)
     const history = memory.messages
@@ -264,7 +387,7 @@ export default defineEventHandler(async (event) => {
     // Save turn to MongoDB with intent, merged validationData, and agentType
     emit('agent_active', { node: 'memory', status: 'processing' });
     await memoryService.save(sessionId, message, fullResponse, {
-      intent,
+      intent: effectiveIntent,
       validationData: mergedValidationData,
       agentType: 'specialist',
     });
