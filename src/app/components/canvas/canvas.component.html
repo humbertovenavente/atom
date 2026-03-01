@@ -1,0 +1,47 @@
+<f-flow fDraggable (fMoveNodes)="onMoveNodes($event)">
+  <f-canvas>
+    <!-- Edges (rendered before nodes so they appear behind) -->
+    <f-connection
+      *ngFor="let edge of flowService.edges()"
+      [fOutputId]="edge.source + '-out'"
+      [fInputId]="edge.target + '-in'"
+      fType="segment"
+      [class.edge--active]="flowService.activeNodeId() === edge.source || flowService.activeNodeId() === edge.target">
+    </f-connection>
+
+    <!-- Nodes -->
+    <div
+      *ngFor="let node of flowService.nodes()"
+      fNode
+      fDragHandle
+      [fNodeId]="node.id"
+      [fNodePosition]="node.position"
+      class="flow-node"
+      [class.node--active]="flowService.activeNodeId() === node.id"
+      [style.borderColor]="node.data.color"
+      (click)="flowService.setSelectedNode(node.id)">
+
+      <!-- Output port (right side) -->
+      <div
+        fNodeOutput
+        [fOutputId]="node.id + '-out'"
+        fOutputConnectableSide="right"
+        class="flow-node__port flow-node__port--out">
+      </div>
+
+      <!-- Node body content -->
+      <div class="flow-node__content">
+        <span class="flow-node__icon">{{ getEmoji(node.data.icon) }}</span>
+        <span class="flow-node__label">{{ node.data.label }}</span>
+      </div>
+
+      <!-- Input port (left side) -->
+      <div
+        fNodeInput
+        [fInputId]="node.id + '-in'"
+        fInputConnectableSide="left"
+        class="flow-node__port flow-node__port--in">
+      </div>
+    </div>
+  </f-canvas>
+</f-flow>
