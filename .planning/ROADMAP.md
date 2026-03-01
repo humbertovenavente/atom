@@ -121,7 +121,7 @@ Plans:
   3. Theme toggle button in toolbar switches between dark and light mode, persists in localStorage
   4. Language toggle in toolbar switches all UI text between English and Spanish, persists in localStorage
   5. All components (sidebar, canvas, chat, toolbar, config panel, nodes) respect both theme and language
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 **Requirement details:**
 - **UI-01**: Lighter dark theme — replace pitch-black backgrounds with blue-gray tones, make borders visible

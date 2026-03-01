@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T23:49:33.775Z"
+last_updated: "2026-03-01T23:53:46.058Z"
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 5
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
 | Phase 06-fix-appointment-booking-persistence-bug P02 | 15min | 2 tasks | 1 files |
 | Phase 07-ui-improvements P01 | 8min | 2 tasks | 8 files |
+| Phase 07-ui-improvements P02 | 6min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase 06-02]: effectiveIntent overrides raw classified intent when all booking fields present — specialist prompt, re-validation, and memory all use the corrected scheduling intent
 - [Phase 06-02]: Proactive getAvailableSlots() fetched before LLM call and injected into buildSpecialistPrompt via new availableSlots param — prevents specialist LLM from inventing fake availability
 - [Phase 07-01]: CSS custom properties via [data-theme] attribute on documentElement; ThemeService uses Angular signal + effect(); inline style bindings chosen over Tailwind custom tokens (no config file)
+- [Phase 07-ui-improvements]: No external i18n library — custom I18nService with flat key dictionary; default locale es; language toggle shows opposite locale label
 
 ### Roadmap Evolution
 
