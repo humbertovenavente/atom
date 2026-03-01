@@ -1,4 +1,6 @@
-import { defineEventHandler } from 'h3';
+import { defineEventHandler, getQuery } from 'h3';
+import { connectDB } from '../../db/connect';
+import { Flow } from '../../models/flow';
 import type { FlowNode, FlowEdge } from '../../../shared/types';
 
 const nodes: FlowNode[] = [
@@ -135,6 +137,25 @@ const edges: FlowEdge[] = [
   },
 ];
 
-export default defineEventHandler(() => {
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event);
+
+  // Skip MongoDB lookup when reset is requested
+  if (query['default'] !== 'true') {
+    try {
+      await connectDB();
+      const saved = await Flow.findOne({ flowId: 'default' }).lean();
+      if (saved) {
+        return {
+          nodes: saved.nodes,
+          edges: saved.edges,
+          nodeConfigs: saved.nodeConfigs ?? {},
+        };
+      }
+    } catch {
+      // DB unavailable — fall through to hardcoded default
+    }
+  }
+
   return { nodes, edges };
 });

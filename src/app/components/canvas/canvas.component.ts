@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { NgFor, NgClass, NgStyle } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { FFlowModule, FZoomDirective, FCanvasComponent } from '@foblex/flow';
 import { FlowService } from '../../services/flow.service';
 import type { FMoveNodesEvent } from '@foblex/flow';
@@ -26,7 +26,7 @@ const NODE_TYPE_CONFIGS = [
 @Component({
   selector: 'app-canvas',
   standalone: true,
-  imports: [FFlowModule, NgFor, NgClass, NgStyle],
+  imports: [FFlowModule, NgFor],
   host: { class: 'block w-full h-full relative' },
   templateUrl: './canvas.component.html',
 })
@@ -35,6 +35,8 @@ export class CanvasComponent implements OnInit {
 
   @ViewChild(FZoomDirective) fZoom!: FZoomDirective;
   @ViewChild(FCanvasComponent) fCanvas!: FCanvasComponent;
+
+  private _isDragging = false;
 
   ngOnInit(): void {
     this.flowService.loadDefaultFlow();
@@ -45,8 +47,16 @@ export class CanvasComponent implements OnInit {
   }
 
   onMoveNodes(event: FMoveNodesEvent): void {
+    this._isDragging = true;
     for (const moved of event.nodes) {
       this.flowService.updateNodePosition(moved.id, moved.position);
+    }
+    setTimeout(() => (this._isDragging = false), 0);
+  }
+
+  onNodeClick(nodeId: string): void {
+    if (!this._isDragging) {
+      this.flowService.setSelectedNode(nodeId);
     }
   }
 
