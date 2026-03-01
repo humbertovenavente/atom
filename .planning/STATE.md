@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 3 of 4 (Data & Backend — gap closure complete)
-Plan: 4 of 4 in current phase (03-04 complete — PHASE COMPLETE)
-Status: Complete
-Last activity: 2026-03-01 — Plan 03-04 complete (seed.ts English field names, faq_vector_index, GET /api/faq)
+Phase: 5 of 6 (Configuration & Polish)
+Plan: 1 of 2 in current phase (05-01 complete — NodeConfigPanel + FlowService extensions)
+Status: In Progress
+Last activity: 2026-03-01 — Plan 05-01 complete (NodeConfigPanel, FlowService updateNodeConfig/saveFlow/resetFlow, sidebar swap, node--selected CSS)
 
 Progress: [██████████] 100%
 
@@ -56,6 +56,7 @@ Progress: [██████████] 100%
 | Phase 04 P02 | 5min | 2 tasks | 2 files |
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
+| Phase 05-configuration-polish P01 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,10 @@ Recent decisions affecting current work:
 - [03-04]: seed.ts uses LLM_API_KEY (not GEMINI_API_KEY) — single canonical env var for all LLM/embedding operations
 - [03-04]: faq_vector_index is the canonical Atlas index name — seed and VectorSearchService now consistent
 - [03-04]: GET /api/faq follows vehicles.get.ts pattern — no filtering, embedding: 0 projection, lean()
+- [05-01]: Config stored in node.data.config (embedded per node) — not top-level nodeConfigs map — avoids sync issues on save/load
+- [05-01]: resetFlow() calls GET /api/flow?default=true — Plan 02 implements backend ?default=true param to bypass MongoDB lookup
+- [05-01]: saveFlow() uses raw fetch() (not HttpClient) — consistent with ChatService SSE pattern
+- [05-01]: node--selected CSS uses dashed outline + box-shadow, no animation — distinct from node--active pulse
 
 ### Pending Todos
 
@@ -117,5 +122,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-04-PLAN.md (seed.ts gap closure + GET /api/faq — Phase 3 fully complete)
+Stopped at: Completed 05-01-PLAN.md (NodeConfigPanel + FlowService extensions + sidebar swap)
 Resume file: None
