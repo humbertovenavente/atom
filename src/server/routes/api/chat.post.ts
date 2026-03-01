@@ -19,7 +19,7 @@ function getGenAI(): GoogleGenAI {
   }
   return genaiClient;
 }
-const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.0-flash-001';
+const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.5-flash';
 
 // Orchestrator system prompt and intent classification helper
 const ORCHESTRATOR_SYSTEM = `Eres un clasificador de intenciones para un asistente de agencia de autos.
