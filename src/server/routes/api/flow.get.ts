@@ -141,7 +141,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
 
   // Skip MongoDB lookup when reset is requested
-  if (query.default !== 'true') {
+  if (query['default'] !== 'true') {
     try {
       await connectDB();
       const saved = await Flow.findOne({ flowId: 'default' }).lean();

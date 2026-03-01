@@ -36,12 +36,12 @@ const DEFAULT_PROMPTS: Record<string, string> = {
       <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2 min-w-0">
           <span class="text-lg flex-shrink-0">{{ emoji() }}</span>
-          <span class="text-sm font-medium truncate">{{ node()?.data.label }}</span>
+          <span class="text-sm font-medium truncate">{{ nodeLabel() }}</span>
           <span
             class="text-xs px-2 py-0.5 rounded-full border flex-shrink-0"
-            [style.borderColor]="node()?.data.color"
-            [style.color]="node()?.data.color">
-            {{ node()?.type }}
+            [style.borderColor]="nodeColor()"
+            [style.color]="nodeColor()">
+            {{ nodeType() }}
           </span>
         </div>
         <button
@@ -99,6 +99,9 @@ export class NodeConfigPanelComponent {
   );
 
   readonly emoji = computed(() => EMOJI_MAP[this.node()?.data.icon ?? ''] ?? '📦');
+  readonly nodeLabel = computed(() => this.node()?.data.label ?? '');
+  readonly nodeColor = computed(() => this.node()?.data.color ?? '#6B7280');
+  readonly nodeType = computed(() => this.node()?.type ?? '');
 
   readonly currentPrompt = computed(
     () =>

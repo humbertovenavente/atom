@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { NgFor, NgClass, NgStyle } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { FFlowModule, FZoomDirective, FCanvasComponent } from '@foblex/flow';
 import { FlowService } from '../../services/flow.service';
 import type { FMoveNodesEvent } from '@foblex/flow';
@@ -26,7 +26,7 @@ const NODE_TYPE_CONFIGS = [
 @Component({
   selector: 'app-canvas',
   standalone: true,
-  imports: [FFlowModule, NgFor, NgClass, NgStyle],
+  imports: [FFlowModule, NgFor],
   host: { class: 'block w-full h-full relative' },
   templateUrl: './canvas.component.html',
 })
