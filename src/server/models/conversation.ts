@@ -13,6 +13,7 @@ const conversationSchema = new mongoose.Schema(
     messages: [messageSchema],
     validationData: { type: mongoose.Schema.Types.Mixed, default: {} },
     currentIntent: { type: String, default: null },
+    source: { type: String, enum: ['web', 'telegram'], default: 'web' },
   },
   { timestamps: true }
 );

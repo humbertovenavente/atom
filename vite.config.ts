@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     mainFields: ['module'],
   },
+  server: {
+    allowedHosts: ['.loca.lt', '.ngrok-free.dev', '.ngrok.io'],
+  },
   plugins: [
     tailwindcss(),
     analog({

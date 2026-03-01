@@ -91,7 +91,7 @@ export interface FlowConfig {
 
 export interface FlowNode {
   id: string;
-  type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool';
+  type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool' | 'telegram';
   position: { x: number; y: number };
   data: {
     label: string;
@@ -114,6 +114,7 @@ export interface NodeConfig {
   temperature?: number;
   toolSource?: string;
   validationFields?: string[];
+  botToken?: string;
 }
 
 // ============================================

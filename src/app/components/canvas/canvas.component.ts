@@ -12,6 +12,7 @@ const EMOJI_MAP: Record<string, string> = {
   zap: '⚡',
   'message-circle': '💬',
   tool: '🔧',
+  send: '✈️',
 };
 
 const NODE_TYPE_CONFIGS = [
@@ -21,6 +22,7 @@ const NODE_TYPE_CONFIGS = [
   { type: 'specialist', label: 'Especialista', icon: 'zap', color: '#F59E0B' },
   { type: 'generic', label: 'Genérico', icon: 'message-circle', color: '#6B7280' },
   { type: 'tool', label: 'Herramienta', icon: 'tool', color: '#EF4444' },
+  { type: 'telegram', label: 'Telegram', icon: 'send', color: '#0088CC' },
 ] as const;
 
 @Component({

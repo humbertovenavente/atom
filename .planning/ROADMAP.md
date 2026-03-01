@@ -85,3 +85,16 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 2. Flow Editor | 3/3 | Done | Yes |
 | 3. Data & Backend | 4/4 | Done | 2026-03-01 |
 | 4. Chat & SSE Integration | 2/2 | Done | 2026-03-01 |
+
+### Phase 5: Add Telegram node to visual flow editor
+
+**Goal:** A Telegram bot integration where users configure a bot token in the visual node config panel, register the webhook from the browser, and Telegram users receive AI-powered agent responses through the existing pipeline — fully isolated from web chat sessions
+**Requirements**: TG-01, TG-02, TG-03, TG-04, TG-05, TG-06, TG-07
+**Depends on:** Phase 4
+**Plans:** 4/4 plans complete
+
+Plans:
+- [ ] 05-01-PLAN.md — Types + schema foundation (FlowNode type union, NodeConfig botToken, conversationSchema source, memoryService $setOnInsert)
+- [ ] 05-02-PLAN.md — Frontend node UI (sidebar + canvas + conditional config panel with bot token input and webhook registration)
+- [ ] 05-03-PLAN.md — Backend webhook handler (telegram.post.ts — non-streaming agent pipeline + Telegram sendMessage reply)
+- [ ] 05-04-PLAN.md — Dev server startup + human end-to-end verification checkpoint
