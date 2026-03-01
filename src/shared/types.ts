@@ -15,7 +15,7 @@ export interface ChatMessage {
   agentType?: AgentType;
 }
 
-export type AgentType = 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic';
+export type AgentType = 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'booking';
 
 // ============================================
 // AGENTES
@@ -63,6 +63,31 @@ export interface ScheduleValidationData {
   preferredTime?: string;
   appointmentType?: 'prueba_manejo' | 'asesoria';
   vehicleOfInterest?: string;
+}
+
+// ============================================
+// RESERVAS (BOOKING)
+// ============================================
+
+export interface BookedSlot {
+  date: string;
+  time: string;
+  fullName: string;
+  sessionId: string;
+  bookedAt: Date;
+}
+
+export type BookingFailureReason =
+  | 'date_not_found'
+  | 'slot_not_available'
+  | 'slot_already_booked'
+  | 'day_fully_booked';
+
+export interface BookingResult {
+  success: boolean;
+  reason?: BookingFailureReason;
+  booking?: BookedSlot;
+  availableSlots?: string[];
 }
 
 // ============================================
@@ -122,7 +147,7 @@ export interface NodeConfig {
 // ============================================
 
 export interface SSEEvent {
-  event: 'agent_active' | 'message_chunk' | 'validation_update' | 'done' | 'error';
+  event: 'agent_active' | 'message_chunk' | 'validation_update' | 'booking_confirmed' | 'booking_failed' | 'done' | 'error';
   data: any;
 }
 
@@ -138,4 +163,15 @@ export interface MessageChunkEvent {
 export interface ValidationUpdateEvent {
   collectedData: Record<string, any>;
   missingFields: string[];
+}
+
+export interface BookingConfirmedEvent {
+  date: string;
+  time: string;
+  fullName: string;
+}
+
+export interface BookingFailedEvent {
+  reason: BookingFailureReason;
+  availableSlots: string[];
 }

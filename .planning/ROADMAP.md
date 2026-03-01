@@ -98,3 +98,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Data & Backend | 4/4 | Done | 2026-03-01 |
 | 4. Chat & SSE Integration | 2/2 | Complete    | 2026-03-01 |
 | 5. Configuration & Polish | 0/? | Not started | - |
+
+### Phase 6: Fix appointment booking persistence bug
+
+**Goal:** Fix the booking flow in chat.post.ts so appointments actually persist to the books collection when all scheduling fields are collected, and inject real availability data into the specialist prompt so the LLM never invents fake schedules
+**Requirements**: BOOK-01, BOOK-02, BOOK-03, BOOK-04, BOOK-05
+**Depends on:** Phase 4
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Type contracts, export getAvailableSlots, add booking node to flow pipeline
+- [ ] 06-02-PLAN.md — Fields-first booking guard, proactive slot injection, effectiveIntent in chat.post.ts + human verification
