@@ -4,7 +4,7 @@
  * Creates Atlas Vector Search indexes and polls until READY.
  *
  * Usage: npm run seed
- * Requires: GEMINI_API_KEY in .env
+ * Requires: LLM_API_KEY in .env
  */
 
 import { readFileSync } from 'fs';
@@ -28,11 +28,11 @@ try {
   console.warn('Warning: could not load .env file — using existing environment variables');
 }
 
-if (!process.env['GEMINI_API_KEY']) {
-  throw new Error('GEMINI_API_KEY not set in .env');
+if (!process.env['LLM_API_KEY']) {
+  throw new Error('LLM_API_KEY not set in .env');
 }
 
-const genai = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
+const genai = new GoogleGenAI({ apiKey: process.env['LLM_API_KEY'] });
 
 // ---------------------------------------------------------------------------
 // Embedding helper
@@ -126,22 +126,22 @@ function loadVehicles(): { raw: RawVehicle[]; docs: Record<string, unknown>[] } 
   const raw: RawVehicle[] = json.available_vehicles;
 
   const docs = raw.map(v => ({
-    marca: v.Marca,
-    modelo: v.Modelo,
-    año: v.Año,
-    kilometraje: v.Kilometraje,
+    brand: v.Marca,
+    model: v.Modelo,
+    year: v.Año,
+    mileage: v.Kilometraje,
     color: v.Color,
-    descripcion: v.Descripción,
-    puertas: v.Puertas,
-    segmento: v.Segmento,
-    precio: v.Precio,
-    estado: v.Estado,
-    ciudad: v.Ciudad,
-    tipoCombustible: v['Tipo de combustible'],
-    motor: v.Motor,
-    transmision: v.Transmisión,
+    description: v.Descripción,
+    doors: v.Puertas,
+    segment: v.Segmento,
+    price: v.Precio,
+    state: v.Estado,
+    city: v.Ciudad,
+    fuelType: v['Tipo de combustible'],
+    engine: v.Motor,
+    transmission: v.Transmisión,
     url: v.URL,
-    cantidad: v.Cantidad ?? 1,
+    quantity: v.Cantidad ?? 1,
   }));
 
   return { raw, docs };
@@ -163,10 +163,10 @@ function loadFAQs(): { texts: string[]; docs: Record<string, unknown>[] } {
     for (const item of category.preguntas) {
       texts.push(`${item.pregunta} ${item.respuesta}`);
       docs.push({
-        categoria: category.categoria,
-        pregunta: item.pregunta,
-        respuesta: item.respuesta,
-        faqId: item.id,
+        category: category.categoria,
+        question: item.pregunta,
+        answer: item.respuesta,
+        originalId: item.id,
       });
     }
   }
@@ -312,13 +312,13 @@ async function main(): Promise<void> {
 
   console.log('Setting up Atlas Vector Search indexes...');
   await ensureVectorIndex(db, vehicleColl, 'vehicles_vector_index');
-  await ensureVectorIndex(db, faqColl, 'faqs_vector_index');
+  await ensureVectorIndex(db, faqColl, 'faq_vector_index');
   console.log();
 
   console.log('Polling until indexes are READY (timeout: 3 min)...');
   await Promise.all([
     pollUntilReady(db, vehicleColl, 'vehicles_vector_index'),
-    pollUntilReady(db, faqColl, 'faqs_vector_index'),
+    pollUntilReady(db, faqColl, 'faq_vector_index'),
   ]);
   console.log('\nAll vector search indexes are READY.\n');
 
