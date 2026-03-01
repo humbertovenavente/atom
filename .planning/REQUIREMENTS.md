@@ -97,48 +97,48 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| MEM-01 | TBD | Pending |
-| MEM-02 | TBD | Pending |
-| MEM-03 | TBD | Pending |
-| MEM-04 | TBD | Pending |
-| ORCH-01 | TBD | Pending |
-| ORCH-02 | TBD | Pending |
-| ORCH-03 | TBD | Pending |
-| ORCH-04 | TBD | Pending |
-| VAL-01 | TBD | Pending |
-| VAL-02 | TBD | Pending |
-| VAL-03 | TBD | Pending |
-| VAL-04 | TBD | Pending |
-| VAL-05 | TBD | Pending |
-| VAL-06 | TBD | Pending |
-| VAL-07 | TBD | Pending |
-| SPEC-01 | TBD | Pending |
-| SPEC-02 | TBD | Pending |
-| SPEC-03 | TBD | Pending |
-| SPEC-04 | TBD | Pending |
-| SPEC-05 | TBD | Pending |
-| SPEC-06 | TBD | Pending |
-| GEN-01 | TBD | Pending |
-| GEN-02 | TBD | Pending |
-| GEN-03 | TBD | Pending |
-| FLOW-01 | TBD | Pending |
-| FLOW-02 | TBD | Pending |
-| FLOW-03 | TBD | Pending |
-| CROSS-01 | TBD | Pending |
-| CROSS-02 | TBD | Pending |
-| CROSS-03 | TBD | Pending |
-| CROSS-04 | TBD | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| MEM-01 | Phase 1 | Pending |
+| MEM-02 | Phase 1 | Pending |
+| MEM-04 | Phase 1 | Pending |
+| ORCH-01 | Phase 2 | Pending |
+| ORCH-02 | Phase 2 | Pending |
+| ORCH-03 | Phase 2 | Pending |
+| ORCH-04 | Phase 2 | Pending |
+| GEN-01 | Phase 2 | Pending |
+| GEN-02 | Phase 2 | Pending |
+| GEN-03 | Phase 2 | Pending |
+| CROSS-01 | Phase 2 | Pending |
+| CROSS-02 | Phase 2 | Pending |
+| CROSS-03 | Phase 2 | Pending |
+| CROSS-04 | Phase 2 | Pending |
+| VAL-01 | Phase 3 | Pending |
+| VAL-02 | Phase 3 | Pending |
+| VAL-03 | Phase 3 | Pending |
+| VAL-04 | Phase 3 | Pending |
+| VAL-05 | Phase 3 | Pending |
+| VAL-06 | Phase 3 | Pending |
+| VAL-07 | Phase 3 | Pending |
+| SPEC-01 | Phase 3 | Pending |
+| SPEC-02 | Phase 3 | Pending |
+| SPEC-03 | Phase 3 | Pending |
+| SPEC-04 | Phase 3 | Pending |
+| SPEC-05 | Phase 3 | Pending |
+| SPEC-06 | Phase 3 | Pending |
+| FLOW-01 | Phase 3 | Pending |
+| FLOW-02 | Phase 3 | Pending |
+| MEM-03 | Phase 4 | Pending |
+| FLOW-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 36 total
-- Mapped to phases: 0
-- Unmapped: 36
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 — traceability complete after roadmap creation*
