@@ -41,6 +41,7 @@ const EMOJI_MAP: Record<string, string> = {
         <div
           *ngFor="let config of nodeTypes"
           draggable="true"
+          (dragstart)="onDragStart($event, config.type)"
           class="rounded-lg p-3 cursor-grab hover:bg-gray-800 transition-colors select-none"
           [style.borderLeft]="'3px solid ' + config.color">
           <div class="flex items-center gap-2 mb-1">
@@ -58,5 +59,12 @@ export class SidebarComponent {
 
   getEmoji(iconName: string): string {
     return EMOJI_MAP[iconName] ?? '📦';
+  }
+
+  onDragStart(event: DragEvent, nodeType: string): void {
+    event.dataTransfer?.setData('application/node-type', nodeType);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'copy';
+    }
   }
 }

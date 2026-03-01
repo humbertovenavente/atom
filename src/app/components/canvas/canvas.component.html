@@ -1,5 +1,5 @@
-<f-flow fDraggable (fMoveNodes)="onMoveNodes($event)">
-  <f-canvas>
+<f-flow fDraggable (fMoveNodes)="onMoveNodes($event)" (drop)="onCanvasDrop($event)" (dragover)="onCanvasDragOver($event)">
+  <f-canvas fZoom>
     <!-- Edges (rendered before nodes so they appear behind) -->
     <f-connection
       *ngFor="let edge of flowService.edges()"
@@ -44,4 +44,14 @@
       </div>
     </div>
   </f-canvas>
+
+  <!-- Mini-map — bottom-right corner -->
+  <f-minimap class="canvas-minimap"></f-minimap>
 </f-flow>
+
+<!-- Zoom controls — bottom-left corner (outside f-flow, positioned absolute to host) -->
+<div class="zoom-controls">
+  <button (click)="zoomIn()" title="Zoom in">+</button>
+  <button (click)="zoomOut()" title="Zoom out">&#8722;</button>
+  <button (click)="fitView()" title="Fit view">&#8869;</button>
+</div>

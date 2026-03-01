@@ -113,3 +113,48 @@ html, body {
 .f-canvas {
   background: #111827 !important;
 }
+
+/* Zoom controls — bottom-left of canvas host */
+.zoom-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+}
+
+.zoom-controls button {
+  width: 32px;
+  height: 32px;
+  background: #1F2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+}
+
+.zoom-controls button:hover {
+  background: #374151;
+}
+
+/* Mini-map — bottom-right of canvas */
+.canvas-minimap {
+  position: absolute !important;
+  bottom: 16px !important;
+  right: 16px !important;
+  width: 160px !important;
+  height: 120px !important;
+  background: #1F2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  z-index: 10 !important;
+}
