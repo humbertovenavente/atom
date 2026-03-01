@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 4 of 4 (Chat SSE Integration)
-Plan: 2 of 2 in current phase (04-02 complete)
-Status: Complete
-Last activity: 2026-03-01 — Plan 04-02 complete (human verified all 4 e2e scenarios: streaming, node highlighting, multi-turn, session persistence)
+Phase: 5 of 5 (Add Telegram Node to Visual Flow Editor)
+Plan: 1 of 4 in current phase (05-01 complete)
+Status: In Progress
+Last activity: 2026-03-01 — Plan 05-01 complete (type union, botToken schema, source field, $setOnInsert save())
 
 Progress: [██████████] 100%
 
@@ -109,6 +109,12 @@ Recent decisions affecting current work:
 - [04-01]: Orchestrator extracts field values from user message in same LLM call as intent classification — merges with existing validationData from MongoDB
 - [04-01]: Lazy OpenAI singleton for chat using LLM_API_KEY/LLM_BASE_URL/LLM_MODEL — same env var pattern as vectorSearchService
 - [04-02]: Phase 4 end-to-end verified — all 4 manual tests passed: generic streaming, catalog multi-turn field collection, schedule multi-turn appointment, session persistence
+- [05-01]: botToken declared in Mongoose nodeConfigSchema — required to bypass strict mode silent strip on save
+- [05-01]: $setOnInsert used for conversation source field — ensures channel type is immutable after first write
+
+### Roadmap Evolution
+
+- Phase 5 added: Add Telegram node to visual flow editor
 
 ### Pending Todos
 
@@ -122,5 +128,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 04-02-PLAN.md (human verification — all 4 e2e tests passed, Phase 4 complete)
-Resume file: None
+Stopped at: Phase 05 Plan 01 complete — 05-01-PLAN.md
+Resume file: .planning/phases/05-add-telegram-node-to-visual-flow-editor/05-02-PLAN.md

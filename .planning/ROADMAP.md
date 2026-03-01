@@ -91,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Goal:** A Telegram bot integration where users configure a bot token in the visual node config panel, register the webhook from the browser, and Telegram users receive AI-powered agent responses through the existing pipeline — fully isolated from web chat sessions
 **Requirements**: TG-01, TG-02, TG-03, TG-04, TG-05, TG-06, TG-07
 **Depends on:** Phase 4
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 05-01-PLAN.md — Types + schema foundation (FlowNode type union, NodeConfig botToken, conversationSchema source, memoryService $setOnInsert)
