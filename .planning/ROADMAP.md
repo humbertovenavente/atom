@@ -14,9 +14,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Setup** - Analog.js scaffold, @foblex/flow, Tailwind, 3-panel layout, types, MongoDB connection
 - [x] **Phase 2: Flow Editor** - Custom nodes, drag & drop, edges, mini-map, zoom, FlowService
-- [ ] **Phase 3: Data & Backend** - Seed MongoDB Atlas con vector embeddings desde jsons/, API routes para vehicles/dates/FAQ, users & sessions
+- [x] **Phase 3: Data & Backend** - Seed MongoDB Atlas con vector embeddings desde jsons/, API routes para vehicles/dates/FAQ, users & sessions
 - [x] **Phase 4: Chat & SSE Integration** - Chat UI, streaming, typing indicator, node highlighting, ChatService (completed 2026-03-01)
-- [ ] **Phase 5: Configuration & Polish** - Config panel, save/load flow, reset/new chat buttons
+- [ ] **Phase 5: Configuration & Polish** - Config panel, save/load flow, reset/new chat buttons (Gap Closure)
+- [ ] **Phase 6: Chat Pipeline Fixes** - Rewire chat.post.ts to vectorSearchService, fix agent badge display, illuminate all 5 node types (Gap Closure)
 
 ## Phase Details
 
@@ -54,9 +55,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. GET /api/vehicles devuelve autos desde MongoDB (no desde archivo estático)
   4. GET /api/dates devuelve slots disponibles desde MongoDB
   5. POST /api/sessions crea una sesión nueva y GET /api/sessions/:id la recupera con su historial
-**Plans**: 2 plans
-- [ ] 03-01-PLAN.md — Mongoose models (Vehicle, FAQ, DateSlot) + seed script with OpenAI embeddings + Atlas Vector Search indexes
-- [ ] 03-02-PLAN.md — API routes (vehicles, dates, sessions) + VectorSearchService for semantic search
+**Plans**: Complete (2 summaries)
+- [x] 03-01-PLAN.md — Mongoose models (Vehicle, FAQ, DateSlot) + seed script with Gemini embeddings + Atlas Vector Search indexes
+- [x] 03-02-PLAN.md — API routes (vehicles, dates, sessions) + VectorSearchService for semantic search
 
 ### Phase 4: Chat & SSE Integration
 **Goal**: A working chat playground where messages stream in token-by-token via SSE, and the corresponding flow nodes illuminate in real time as the agent executes — backed by real MongoDB data
@@ -70,13 +71,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Auto-scroll follows new messages when the user is at the bottom; stops auto-scrolling when the user scrolls up
   6. La sesión de chat se persiste en MongoDB (sessions collection)
 **Plans**: 2 plans
-- [ ] 04-01-PLAN.md — ChatService (SSE streaming, session management, FlowService bridge) + FlowService completedNodeIds + canvas node highlighting CSS
-- [ ] 04-02-PLAN.md — ChatComponent full UI (message bubbles, markdown, typing indicator, auto-scroll, session restore, suggestion chips) + visual checkpoint
+- [x] 04-01-PLAN.md — ChatService (SSE streaming, session management, FlowService bridge) + FlowService completedNodeIds + canvas node highlighting CSS
+- [x] 04-02-PLAN.md — ChatComponent full UI (message bubbles, markdown, typing indicator, auto-scroll, session restore, suggestion chips) + visual checkpoint
 
 ### Phase 5: Configuration & Polish
 **Goal**: Users can click any node to edit its configuration, persist the flow to the backend, reset to defaults, and start a new conversation — the app is demo-ready
 **Depends on**: Phase 4
 **Requirements**: CONF-01, CONF-02, CONF-03, CONF-04, CONF-05
+**Gap Closure:** Closes 5 orphaned requirements from audit
 **Success Criteria** (what must be TRUE):
   1. Clicking a node opens a configuration panel showing that node's editable properties (system prompt, temperature)
   2. The flow can be saved to the backend (POST /api/flow) and reloaded (GET /api/flow) without losing node positions or configuration
@@ -84,15 +86,28 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. "Nueva Conversacion" clears the chat history and starts a fresh session (nueva session en MongoDB)
 **Plans**: TBD
 
+### Phase 6: Chat Pipeline Fixes
+**Goal**: The chat backend uses vectorSearchService for real semantic search, all 5 agent node types illuminate during chat, and agent badges display correctly on streamed messages
+**Depends on**: Phase 5
+**Requirements**: (none — closes integration/flow gaps)
+**Gap Closure:** Closes 2 integration breaks + 2 broken E2E flows from audit
+**Success Criteria** (what must be TRUE):
+  1. `chat.post.ts` imports and calls `vectorSearchService` instead of static `data/loader.ts`
+  2. All 5 agent node types (memory, orchestrator, specialist, validator, generic) emit `agent_active` SSE events during chat
+  3. `ChatService.handleSSEEvent` writes `agentType` to the current assistant message so badges render on live-streamed messages
+  4. The "Chat → Full Agent Orchestration" E2E flow completes without breaks
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
-| 3. Data & Backend | 1/2 | In Progress|  |
-| 4. Chat & SSE Integration | 2/2 | Complete   | 2026-03-01 |
-| 5. Configuration & Polish | 0/? | Not started | - |
+| 3. Data & Backend | 2/2 | Done | 2026-03-01 |
+| 4. Chat & SSE Integration | 2/2 | Done | 2026-03-01 |
+| 5. Configuration & Polish | 0/? | Not started (gap closure) | - |
+| 6. Chat Pipeline Fixes | 0/? | Not started (gap closure) | - |
