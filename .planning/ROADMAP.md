@@ -71,7 +71,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. When a `node_active` SSE event arrives, the corresponding node on the canvas visually highlights; the highlight clears when processing moves on
   5. Auto-scroll follows new messages when the user is at the bottom; stops auto-scrolling when the user scrolls up
   6. La sesión de chat se persiste en MongoDB (sessions collection)
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 04-01-PLAN.md — npm install + memoryService agentType support + full 4-step LLM pipeline in chat.post.ts
+- [ ] 04-02-PLAN.md — Dev server startup verification + human end-to-end verification checkpoint
 
 ### Phase 5: Configuration & Polish
 **Goal**: Users can click any node to edit its configuration, persist the flow to the backend, reset to defaults, and start a new conversation — the app is demo-ready
@@ -94,5 +96,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
 | 3. Data & Backend | 4/4 | Done | 2026-03-01 |
-| 4. Chat & SSE Integration | 0/? | Not started | - |
+| 4. Chat & SSE Integration | 0/2 | Not started | - |
 | 5. Configuration & Polish | 0/? | Not started | - |
