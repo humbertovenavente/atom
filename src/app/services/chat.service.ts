@@ -17,6 +17,7 @@ const AGENT_NODE_MAP: Record<string, string> = {
 
 export interface SessionSummary {
   sessionId: string;
+  title: string | null;
   preview: string;
   updatedAt: string;
 }
@@ -199,5 +200,25 @@ export class ChatService {
   async switchToSession(sessionId: string): Promise<void> {
     await this.loadSession(sessionId);
     localStorage.setItem('chat_session_id', sessionId);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+    this.sessionHistory.update((list) => list.filter((s) => s.sessionId !== sessionId));
+    // If we just deleted the active session, reset
+    if (this.sessionId() === sessionId) {
+      this.startNewSession();
+    }
+  }
+
+  async renameSession(sessionId: string, title: string): Promise<void> {
+    await fetch(`/api/sessions/${sessionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    });
+    this.sessionHistory.update((list) =>
+      list.map((s) => (s.sessionId === sessionId ? { ...s, title } : s))
+    );
   }
 }

@@ -33,7 +33,7 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
       <!-- Header -->
       <div class="px-4 py-3 border-b border-gray-700/50 flex-shrink-0 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Chat Playground</h2>
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Chat</h2>
           <button (click)="toggleHistory()"
             class="text-gray-500 hover:text-gray-300 transition-colors"
             [class.text-blue-400]="showHistory()"
@@ -62,15 +62,49 @@ const AGENT_BADGE_MAP: Record<string, { label: string; color: string }> = {
               <p class="text-xs text-gray-500 text-center py-6">No previous conversations</p>
             }
             @for (session of chat.sessionHistory(); track session.sessionId) {
-              <button
-                (click)="loadSession(session.sessionId)"
-                class="w-full text-left rounded-lg px-3 py-2.5 transition-all duration-150 border border-transparent"
-                [class]="session.sessionId === chat.sessionId()
-                  ? 'bg-blue-600/15 border-blue-500/30 text-blue-300'
-                  : 'hover:bg-gray-800/60 text-gray-300 hover:border-gray-700/50'">
-                <p class="text-sm truncate">{{ session.preview }}</p>
-                <p class="text-[10px] text-gray-500 mt-0.5">{{ formatDate(session.updatedAt) }}</p>
-              </button>
+              <div class="group relative">
+                @if (editingSessionId() === session.sessionId) {
+                  <div class="flex items-center gap-1.5 rounded-lg px-3 py-2.5 bg-gray-800 border border-gray-600">
+                    <input
+                      type="text"
+                      [(ngModel)]="editingTitle"
+                      (keydown.enter)="confirmRename(session.sessionId)"
+                      (keydown.escape)="cancelRename()"
+                      class="flex-1 bg-transparent text-sm text-white outline-none min-w-0"
+                      autofocus
+                    />
+                    <button (click)="confirmRename(session.sessionId)" class="text-green-400 hover:text-green-300 shrink-0 p-0.5" title="Save">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <button (click)="cancelRename()" class="text-gray-400 hover:text-gray-300 shrink-0 p-0.5" title="Cancel">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    (click)="loadSession(session.sessionId)"
+                    class="w-full text-left rounded-lg px-3 py-2.5 pr-16 transition-all duration-150 border border-transparent"
+                    [class]="session.sessionId === chat.sessionId()
+                      ? 'bg-blue-600/15 border-blue-500/30 text-blue-300'
+                      : 'hover:bg-gray-800/60 text-gray-300 hover:border-gray-700/50'">
+                    <p class="text-sm truncate">{{ session.title || session.preview }}</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">{{ formatDate(session.updatedAt) }}</p>
+                  </button>
+                  <!-- Action buttons -->
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="startRename(session); $event.stopPropagation()"
+                      class="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-gray-700/60 transition-colors"
+                      title="Rename">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    </button>
+                    <button (click)="deleteSession(session.sessionId); $event.stopPropagation()"
+                      class="p-1.5 rounded-md text-gray-500 hover:text-red-400 hover:bg-gray-700/60 transition-colors"
+                      title="Delete">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
             }
           </div>
         </div>
@@ -170,6 +204,8 @@ export class ChatComponent {
   inputText = '';
   userScrolledUp = false;
   readonly showHistory = signal(false);
+  readonly editingSessionId = signal<string | null>(null);
+  editingTitle = '';
 
   readonly suggestionChips = [
     'Browse car catalog',
@@ -264,6 +300,29 @@ export class ChatComponent {
   getAgentBadge(agentType?: string): { label: string; color: string } | null {
     if (!agentType) return null;
     return AGENT_BADGE_MAP[agentType] ?? null;
+  }
+
+  startRename(session: { sessionId: string; title?: string | null; preview: string }): void {
+    this.editingSessionId.set(session.sessionId);
+    this.editingTitle = session.title || session.preview;
+  }
+
+  cancelRename(): void {
+    this.editingSessionId.set(null);
+    this.editingTitle = '';
+  }
+
+  async confirmRename(sessionId: string): Promise<void> {
+    const title = this.editingTitle.trim();
+    if (title) {
+      await this.chat.renameSession(sessionId, title);
+    }
+    this.editingSessionId.set(null);
+    this.editingTitle = '';
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await this.chat.deleteSession(sessionId);
   }
 
   formatDate(dateStr: string): string {
