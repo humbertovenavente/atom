@@ -4,6 +4,63 @@ Decisions that affect both frontend and backend. Updated as phases progress.
 
 ---
 
+## Phase 3: Data & Backend (current)
+
+**Date:** 2026-03-01
+
+### Schema Alignment
+
+The remote codebase (post-pull) uses **Spanish field names** in Mongoose models but Atlas has **English-field seed data** from Phase 2. Decision: **update models to English** — no re-seeding.
+
+**Vehicle model fields (English):** `brand`, `model`, `year`, `mileage`, `color`, `description`, `doors`, `segment`, `price`, `state`, `city`, `fuelType`, `engine`, `transmission`, `url`, `quantity`, `embedding`
+
+**FAQ model fields (English):** `category`, `question`, `answer`, `originalId`, `embedding`
+
+**DateSlot model:** verify field names match Atlas before changing anything.
+
+### Database Structure (corrected from Phase 2)
+
+Remote code uses **single-database** (not two-DB). All collections live in `atom_knowledge`:
+- `vehicles`, `faq`, `dateslots` — knowledge base
+- `conversations` — sessions/chat history (uses `Conversation` model — name kept as-is)
+
+### Env Var Standardization
+
+- Use `LLM_API_KEY` everywhere (not `GEMINI_API_KEY`)
+- Update `VectorSearchService` to read `process.env['LLM_API_KEY']`
+
+### Atlas Vector Search Index Names
+
+| Collection | Index name |
+|------------|------------|
+| `vehicles` | `vehicles_vector_index` |
+| `faq` | `faq_vector_index` (not `faqs_vector_index`) |
+
+### Semantic Search (VectorSearchService)
+
+- Returns **top 3 results** (default changed from 5 → 3)
+- **No score threshold** — return top N always
+- **Fallback:** if `$vectorSearch` returns empty → run regular `.find()` with simple filter
+- **No `searchDates()`** — date slots use date filter only (`GET /api/dates`)
+
+### chat.post.ts Rewiring (Phase 3 scope)
+
+- Switch from `data/loader.ts` (static JSON) → MongoDB + VectorSearchService
+- Inject **top 3 vehicles + top 3 FAQs** into LLM system prompt context
+- Delete `data/loader.ts` and static JSON source files after wiring
+
+### Session API
+
+| Method | Endpoint | Behavior |
+|--------|----------|----------|
+| POST | /api/sessions | Creates session, returns `{ sessionId }` |
+| GET | /api/sessions/:id | Returns session (empty `messages: []` if new — not 404) |
+
+- Sessions have **24-hour TTL** (MongoDB TTL index on `createdAt`)
+- No `DELETE /api/sessions/:id` — "Nueva Conversación" creates a new session ID instead
+
+---
+
 ## Phase 2: Data & Backend
 
 **Date:** 2026-03-01
