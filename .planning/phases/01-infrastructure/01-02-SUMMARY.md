@@ -69,7 +69,7 @@ completed: 2026-03-01
 - **Duration:** 4 min
 - **Started:** 2026-03-01T04:37:12Z
 - **Completed:** 2026-03-01T04:40:50Z
-- **Tasks:** 2 of 3 complete (Task 3 is checkpoint:human-verify)
+- **Tasks:** 3 of 3 complete (Task 3 checkpoint:human-verify approved)
 - **Files modified:** 7 created, 1 modified
 
 ## Accomplishments
@@ -86,7 +86,9 @@ Each task was committed atomically:
 1. **Task 1: Create MongoDB connection, Conversation model, and Memory service** - `df24527` (feat)
 2. **Task 2: Create static JSON data files, typed loader, and wire everything into chat.post.ts** - `ef71417` (feat)
 
-**Plan metadata:** TBD (docs: complete plan — pending after checkpoint)
+3. **Task 3: Verify end-to-end SSE streaming and MongoDB persistence** - `checkpoint approved` (human-verify)
+
+**Plan metadata:** `5615370` (docs: complete plan)
 
 ## Files Created/Modified
 - `src/server/db/connect.ts` - MongoDB singleton with global._mongooseConn cache, maxPoolSize:3, bufferCommands:false, MONGODB_URI env check
@@ -124,11 +126,12 @@ MongoDB Atlas setup (if not already done):
 5. Copy `.env.example` to `.env` and replace `MONGODB_URI` with your actual connection string
 
 ## Next Phase Readiness
-- All Phase 1 code complete — pending human verification of MongoDB end-to-end at Task 3 checkpoint
-- After checkpoint approval: all INFRA-01 through INFRA-05, MEM-01, MEM-02, MEM-04 requirements satisfied
-- SSE on Vercel still unverified — remains a blocker for Phase 2 start (per STATE.md decision)
+- All Phase 1 code complete — Task 3 checkpoint:human-verify approved by user on 2026-03-01
+- All INFRA-01 through INFRA-05, MEM-01, MEM-02, MEM-04 requirements satisfied and verified end-to-end
+- MongoDB Atlas read/write confirmed working: multi-turn turn count increments correctly, new sessions start at #1
+- SSE streaming confirmed working locally; Vercel Preview URL verification still required before Phase 2 start
 
-## Self-Check
+## Self-Check: PASSED
 
 All created files verified on disk:
 - src/server/db/connect.ts - FOUND
@@ -141,8 +144,11 @@ All created files verified on disk:
 - src/server/routes/api/chat.post.ts - FOUND (modified)
 
 All task commits verified in git history:
-- df24527 - Task 1
-- ef71417 - Task 2
+- df24527 - Task 1 (MongoDB connection, Conversation model, memory service)
+- ef71417 - Task 2 (static JSON data, typed loader, wire into chat.post.ts)
+- 5615370 - Docs commit (SUMMARY.md, STATE.md, ROADMAP.md, REQUIREMENTS.md)
+
+Task 3 checkpoint:human-verify: APPROVED by user on 2026-03-01
 
 ---
 *Phase: 01-infrastructure*

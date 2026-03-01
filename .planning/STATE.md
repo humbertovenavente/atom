@@ -78,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 01-01-PLAN.md — Analog.js scaffolded, shared types created, SSE endpoint working
+Stopped at: Completed 01-02-PLAN.md — MongoDB persistence + static data loading verified end-to-end (checkpoint approved)
 Resume file: None
