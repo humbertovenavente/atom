@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
+| Phase 05-telegram P02 | 5min | 2 tasks | 3 files |
 | Phase 05-telegram P03 | 1min | 1 task | 1 file |
 
 ## Accumulated Context
