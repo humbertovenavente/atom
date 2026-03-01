@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T20:08:21.506Z"
+last_updated: "2026-03-01T23:34:03.250Z"
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 7
-  completed_plans: 6
+  total_phases: 2
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 6 of 6 (Fix Appointment Booking Persistence Bug)
-Plan: 1 of 2 in current phase (06-01 complete)
-Status: In Progress
-Last activity: 2026-03-01 — Plan 06-01 complete (type contracts established: SSEEventType extended, AgentType extended, getAvailableSlots exported, booking node added to flow pipeline)
+Plan: 2 of 2 in current phase (06-02 complete — Phase 6 DONE)
+Status: Complete
+Last activity: 2026-03-01 — Plan 06-02 complete (fields-first booking guard, real slot injection, booking SSE events — all 4 human tests passed)
 
-Progress: [████████--] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [████████--] 75%
 | Phase 03-data-backend P03 | 2 | 2 tasks | 10 files |
 | Phase 03-data-backend P04 | 10min | 3 tasks | 2 files |
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
+| Phase 06-fix-appointment-booking-persistence-bug P02 | 15min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [04-02]: Phase 4 end-to-end verified — all 4 manual tests passed: generic streaming, catalog multi-turn field collection, schedule multi-turn appointment, session persistence
 - [06-01]: getAvailableSlots exported as named export — requires own connectDB() call since it may be called outside bookAppointment context
 - [06-01]: Booking flow node uses type 'tool' (matching tool-search pattern) — no new FlowNode type required
+- [Phase 06-02]: Fields-first booking guard: check data presence (fullName+preferredDate+preferredTime) not intent label — eliminates silent booking failures when LLM reclassifies final message
+- [Phase 06-02]: effectiveIntent overrides raw classified intent when all booking fields present — specialist prompt, re-validation, and memory all use the corrected scheduling intent
+- [Phase 06-02]: Proactive getAvailableSlots() fetched before LLM call and injected into buildSpecialistPrompt via new availableSlots param — prevents specialist LLM from inventing fake availability
 
 ### Roadmap Evolution
 
@@ -129,5 +133,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06-01-PLAN.md (type contracts for booking — Plan 02 can now implement the full booking persistence fix)
+Stopped at: Completed 06-02-PLAN.md (fields-first booking guard and real slot injection — Phase 6 complete, all plans done)
 Resume file: None

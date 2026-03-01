@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Goal:** Fix the booking flow in chat.post.ts so appointments actually persist to the books collection when all scheduling fields are collected, and inject real availability data into the specialist prompt so the LLM never invents fake schedules
 **Requirements**: BOOK-01, BOOK-02, BOOK-03, BOOK-04, BOOK-05
 **Depends on:** Phase 4
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 06-01-PLAN.md — Type contracts, export getAvailableSlots, add booking node to flow pipeline
