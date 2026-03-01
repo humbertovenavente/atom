@@ -68,18 +68,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
   generic: [],
 };
 
-const NEXT_QUESTIONS: Record<string, Record<string, string>> = {
-  schedule: {
-    fullName: '¿Cuál es su nombre completo para la cita?',
-    preferredDate: '¿Qué fecha prefiere para su cita? (ej: 15 de marzo)',
-    preferredTime: '¿A qué hora prefiere su cita? (ej: 10:00 AM)',
-  },
-  catalog: {
-    budget: '¿Cuál es su presupuesto aproximado para el vehículo?',
-    vehicleType: '¿Qué tipo de vehículo le interesa? (sedán, SUV, pickup, hatchback, deportivo)',
-  },
-};
-
 function checkFields(
   intent: OrchestratorResult['intent'],
   existingData: Record<string, unknown>
@@ -90,34 +78,114 @@ function checkFields(
     isComplete: missing.length === 0,
     collectedData: existingData as Record<string, any>,
     missingFields: missing,
-    nextQuestion: missing[0] ? NEXT_QUESTIONS[intent]?.[missing[0]] : undefined,
   };
 }
 
-// Specialist prompt builder
+// Human-readable labels for missing fields
+const FIELD_LABELS: Record<string, string> = {
+  fullName: 'nombre del cliente',
+  preferredDate: 'fecha preferida',
+  preferredTime: 'hora preferida',
+  budget: 'presupuesto aproximado',
+  vehicleType: 'tipo de vehículo',
+};
+
+// Specialist prompt builder — conversational, never form-like
 function buildSpecialistPrompt(
   vehicles: unknown[],
   faqs: unknown[],
   validationData: Record<string, unknown>,
-  intent: string
+  intent: string,
+  missingFields: string[],
+  isComplete: boolean
 ): string {
+  // Inject current date so the LLM can resolve "mañana", "el viernes", etc.
+  const now = new Date();
+  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const todayStr = `${dayNames[now.getDay()]} ${now.getDate()} de ${monthNames[now.getMonth()]} de ${now.getFullYear()}`;
+
   const lines = [
-    'Eres un asesor experto de agencia de autos. Responde de forma concisa, amigable y profesional en español.',
+    'Eres un asesor de autos conversacional, amigable y profesional. Responde siempre en español.',
     '',
-    'CATÁLOGO DE VEHÍCULOS RELEVANTES:',
-    JSON.stringify(vehicles, null, 2),
+    `FECHA ACTUAL: Hoy es ${todayStr}. Usa esta fecha para resolver referencias relativas como "mañana", "el viernes", "la próxima semana", etc.`,
     '',
-    'PREGUNTAS FRECUENTES RELEVANTES:',
-    JSON.stringify(faqs, null, 2),
+    'REGLAS DE CONVERSACIÓN:',
+    '- NUNCA hagas preguntas directas tipo formulario ("¿Cuál es su presupuesto?", "¿Cuál es su nombre?")',
+    '- En su lugar, conversa naturalmente: muestra opciones, haz recomendaciones, y descubre preferencias a través del diálogo',
+    '- Si necesitas saber presupuesto, muestra rangos: "Tenemos desde compactos accesibles hasta SUVs premium..."',
+    '- Si necesitas un nombre, introdúcelo naturalmente: "Por cierto, ¿con quién tengo el gusto?"',
+    '- Recopila información orgánicamente durante la conversación, no como interrogatorio',
+    '- Sé conciso pero cálido. No repitas información que ya diste.',
   ];
-  if (intent === 'schedule' && Object.keys(validationData).length > 0) {
-    lines.push('', 'DATOS DE CITA RECOPILADOS:', JSON.stringify(validationData, null, 2));
-    lines.push('El cliente ha proporcionado todos los datos. Confirma la cita de forma cálida y profesional.');
-  } else if (intent === 'catalog' && Object.keys(validationData).length > 0) {
-    lines.push('', 'PREFERENCIAS DEL CLIENTE:', JSON.stringify(validationData, null, 2));
-    lines.push('Usa estas preferencias para personalizar tus recomendaciones de vehículos.');
+
+  // Context: what we already know
+  const collectedEntries = Object.entries(validationData).filter(([, v]) => v != null && v !== '');
+  if (collectedEntries.length > 0) {
+    lines.push('', 'CONTEXTO RECOPILADO DEL CLIENTE:');
+    for (const [k, v] of collectedEntries) {
+      lines.push(`- ${FIELD_LABELS[k] ?? k}: ${v}`);
+    }
   }
-  lines.push('', 'Responde basándote en el contexto anterior. Si no tienes información suficiente, dilo honestamente.');
+
+  // What we still need (but must discover conversationally)
+  if (missingFields.length > 0) {
+    const labels = missingFields.map((f) => FIELD_LABELS[f] ?? f);
+    lines.push(
+      '',
+      `INFORMACIÓN PENDIENTE (integra su descubrimiento naturalmente en la conversación, NO preguntes directamente):`,
+      labels.map((l) => `- ${l}`).join('\n')
+    );
+  }
+
+  // Intent-specific guidance
+  if (intent === 'catalog') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA CATÁLOGO:',
+      '- Muestra vehículos relevantes del contexto aunque no conozcas el presupuesto exacto',
+      '- Presenta opciones en diferentes rangos para que el cliente reaccione',
+      '- Destaca características, no solo precios',
+      '- Ve refinando recomendaciones según las reacciones del cliente'
+    );
+  } else if (intent === 'schedule') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA AGENDAR CITA:',
+      '- Ayuda al cliente a planear su visita de forma natural',
+      '- Sugiere horarios disponibles, menciona qué puede esperar en la visita',
+      '- Ve recopilando nombre, fecha y hora a lo largo de la conversación'
+    );
+  } else if (intent === 'faqs') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA PREGUNTAS FRECUENTES:',
+      '- Responde directamente usando la información de FAQs disponible',
+      '- No necesitas recopilar datos adicionales'
+    );
+  }
+
+  // When all data is complete, instruct to confirm/proceed
+  if (isComplete && intent === 'schedule') {
+    lines.push(
+      '',
+      'TODOS LOS DATOS ESTÁN COMPLETOS. Confirma la cita de forma cálida resumiendo: nombre, fecha y hora. Pregunta si todo está correcto.'
+    );
+  } else if (isComplete && intent === 'catalog') {
+    lines.push(
+      '',
+      'Ya tienes las preferencias del cliente. Haz recomendaciones personalizadas y específicas basándote en su presupuesto y tipo de vehículo preferido.'
+    );
+  }
+
+  // Vector search context
+  if (vehicles.length > 0) {
+    lines.push('', 'VEHÍCULOS RELEVANTES:', JSON.stringify(vehicles, null, 2));
+  }
+  if (faqs.length > 0) {
+    lines.push('', 'PREGUNTAS FRECUENTES RELEVANTES:', JSON.stringify(faqs, null, 2));
+  }
+
   return lines.join('\n');
 }
 
@@ -154,27 +222,21 @@ export default defineEventHandler(async (event) => {
     const validationResult = checkFields(intent, mergedValidationData);
     emit('agent_active', { node: 'validator', status: 'complete' });
 
-    if (!validationResult.isComplete) {
-      // Validator short-circuits: ask for next missing field, save partial data
-      const question = validationResult.nextQuestion ?? '¿Podría proporcionar más información?';
-      emit('message_chunk', { content: question });
-      await memoryService.save(sessionId, message, question, {
-        intent,
-        validationData: mergedValidationData,
-        agentType: 'validator',
-      });
-      emit('done', { sessionId });
-      return;
-    }
-
-    // Step 4: Specialist — vector context + streaming LLM response
+    // Step 4: Specialist — always proceed with vector context + streaming LLM response
     const specialistNode = intent === 'generic' ? 'generic' : `specialist-${intent}`;
     emit('agent_active', { node: specialistNode, status: 'processing' });
     const [vehicles, faqs] = await Promise.all([
       vectorSearchService.searchVehicles(message, 3),
       vectorSearchService.searchFAQs(message, 3),
     ]);
-    const systemPrompt = buildSpecialistPrompt(vehicles, faqs, validationResult.collectedData, intent);
+    const systemPrompt = buildSpecialistPrompt(
+      vehicles,
+      faqs,
+      mergedValidationData,
+      intent,
+      validationResult.missingFields,
+      validationResult.isComplete
+    );
     // Map history to Gemini format (assistant → model, skip system messages)
     const history = memory.messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
@@ -203,7 +265,7 @@ export default defineEventHandler(async (event) => {
     emit('agent_active', { node: 'memory', status: 'processing' });
     await memoryService.save(sessionId, message, fullResponse, {
       intent,
-      validationData: validationResult.collectedData,
+      validationData: mergedValidationData,
       agentType: 'specialist',
     });
     emit('agent_active', { node: 'memory', status: 'complete' });
