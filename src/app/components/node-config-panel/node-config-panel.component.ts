@@ -110,7 +110,7 @@ export class NodeConfigPanelComponent {
       ''
   );
 
-  readonly currentTemp = computed(() => this.node()?.data.config?.temperature ?? 0.7);
+  readonly currentTemp = computed(() => this.node()?.data.config?.temperature ?? 0.3);
 
   close(): void {
     this.flowService.setSelectedNode(null);
