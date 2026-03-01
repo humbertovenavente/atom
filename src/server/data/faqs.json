@@ -1,0 +1,62 @@
+[
+  {
+    "id": "faq-001",
+    "question": "¿Cuáles son sus horarios de atención?",
+    "answer": "Estamos abiertos de lunes a viernes de 8:00 AM a 7:00 PM, sábados de 8:00 AM a 5:00 PM y domingos de 9:00 AM a 2:00 PM.",
+    "tags": ["horarios", "atención", "apertura"]
+  },
+  {
+    "id": "faq-002",
+    "question": "¿Dónde están ubicados?",
+    "answer": "Estamos ubicados en Boulevard Los Próceres km 7.5, Zona 10, Ciudad de Guatemala, frente al Centro Comercial Paseo Los Próceres. Contamos con amplio parqueo.",
+    "tags": ["ubicación", "dirección", "cómo llegar"]
+  },
+  {
+    "id": "faq-003",
+    "question": "¿Cómo es el proceso de compra de un vehículo?",
+    "answer": "El proceso es sencillo: 1) Elegí tu vehículo con nuestra asesoría, 2) Prueba de manejo gratuita, 3) Cotización y opciones de financiamiento, 4) Aprobación de crédito (24-48 horas), 5) Firma de contrato y entrega del vehículo.",
+    "tags": ["compra", "proceso", "pasos", "cómo comprar"]
+  },
+  {
+    "id": "faq-004",
+    "question": "¿Qué opciones de financiamiento tienen disponibles?",
+    "answer": "Ofrecemos financiamiento directo con nuestra financiera, así como alianzas con Banco Industrial, BAM, G&T Continental y Banrural. Planes desde 12 hasta 72 meses con tasas desde el 10% anual. Requerimos 20% de enganche mínimo.",
+    "tags": ["financiamiento", "crédito", "cuotas", "banco"]
+  },
+  {
+    "id": "faq-005",
+    "question": "¿Qué garantía tienen los vehículos nuevos?",
+    "answer": "Los vehículos nuevos cuentan con garantía de fábrica de 3 años o 100,000 km (lo que ocurra primero). Incluye garantía de corrosión por 5 años y asistencia en carretera 24/7 durante el primer año.",
+    "tags": ["garantía", "cobertura", "nuevo", "respaldo"]
+  },
+  {
+    "id": "faq-006",
+    "question": "¿Tienen servicios de mantenimiento post-venta?",
+    "answer": "Sí, contamos con taller autorizado con técnicos certificados. Ofrecemos servicios de mantenimiento preventivo, correctivo, revisión de 30,000 km, pintura y hojalatería. Los primeros 3 servicios de mantenimiento son gratis con la compra.",
+    "tags": ["servicio", "mantenimiento", "taller", "post-venta"]
+  },
+  {
+    "id": "faq-007",
+    "question": "¿Tienen promociones o descuentos disponibles?",
+    "answer": "Actualmente tenemos: 5% de descuento en pago de contado en vehículos seleccionados, precio especial para empleados de empresas convenidas, y bono de combustible de Q2,000 en vehículos nuevos durante marzo 2026.",
+    "tags": ["promociones", "descuentos", "ofertas", "precios especiales"]
+  },
+  {
+    "id": "faq-008",
+    "question": "¿Qué documentos necesito para comprar un vehículo?",
+    "answer": "Para compra de contado: DPI vigente. Para financiamiento: DPI, constancia de ingresos o declaración jurada, estados de cuenta bancarios de los últimos 3 meses, recibo de servicio de agua o luz, y referencias personales.",
+    "tags": ["documentos", "requisitos", "DPI", "papeles"]
+  },
+  {
+    "id": "faq-009",
+    "question": "¿Aceptan vehículos como parte de pago?",
+    "answer": "Sí aceptamos su vehículo como parte de pago. Realizamos una valuación gratuita y aplicamos el valor resultante al enganche del vehículo nuevo. El proceso de valuación toma aproximadamente 30 minutos.",
+    "tags": ["parte de pago", "valuación", "seminuevo", "canje"]
+  },
+  {
+    "id": "faq-010",
+    "question": "¿Tienen vehículos usados o seminuevos?",
+    "answer": "Sí, contamos con una amplia selección de vehículos usados certificados con revisión mecánica de 150 puntos, historial de propietarios verificado y garantía de 6 meses. Financiamiento disponible para usados con antigüedad máxima de 10 años.",
+    "tags": ["usados", "seminuevos", "certificados", "segunda mano"]
+  }
+]

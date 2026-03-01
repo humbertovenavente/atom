@@ -1,10 +1,17 @@
 import { defineEventHandler, readBody, setHeader } from 'h3';
 import { createEmitter } from '../../sse/emitter';
 import type { ChatRequest } from '../../../shared/types';
+import { memoryService } from '../../memory/memory.service';
+import { faqsData, catalogData, scheduleData } from '../../data/loader';
 
 export const config = {
   maxDuration: 60,
 };
+
+// Verify static data loaded at module init time (logged once on first request)
+console.log(
+  `Data loaded: ${(faqsData as unknown[]).length} FAQs, ${(catalogData as unknown[]).length} vehicles, ${(scheduleData as { advisors: unknown[] }).advisors.length} advisors`
+);
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<ChatRequest>(event);
@@ -21,20 +28,26 @@ export default defineEventHandler(async (event) => {
   const emit = createEmitter(event.node.res);
 
   try {
-    // Mock pipeline — hardcoded events proving SSE transport works (Phase 1)
+    // a) Load conversation history from MongoDB
     emit('agent_active', { node: 'memory', status: 'processing' });
+    const memory = await memoryService.load(sessionId);
     emit('agent_active', { node: 'memory', status: 'complete' });
 
+    // b) Simulate orchestrator processing
     emit('agent_active', { node: 'orchestrator', status: 'processing' });
-    // Simulate 100ms processing delay
     await new Promise((resolve) => setTimeout(resolve, 100));
     emit('agent_active', { node: 'orchestrator', status: 'complete' });
 
-    emit('message_chunk', {
-      content: `Hola! Recibí tu mensaje: "${message}". (Respuesta simulada — Fase 1)`,
-    });
+    // c) Build mock response with turn count from memory history
+    // Each turn adds 2 messages (user + assistant), so turn number = (messages.length / 2) + 1
+    const turnNumber = Math.floor(memory.messages.length / 2) + 1;
+    const mockResponse = `Hola! Recibí tu mensaje: "${message}". Este es el turno #${turnNumber} de tu conversación. (Respuesta simulada — Fase 1)`;
 
+    emit('message_chunk', { content: mockResponse });
+
+    // d) Save conversation turn to MongoDB
     emit('agent_active', { node: 'memory', status: 'processing' });
+    await memoryService.save(sessionId, message, mockResponse);
     emit('agent_active', { node: 'memory', status: 'complete' });
 
     emit('done', { sessionId });
