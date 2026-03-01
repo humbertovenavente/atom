@@ -165,3 +165,46 @@ html, body {
   overflow: hidden !important;
   z-index: 10 !important;
 }
+
+/* Typing indicator (three bouncing dots) */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+  align-items: center;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: #9CA3AF;
+  border-radius: 50%;
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Blinking cursor at end of streaming text */
+.streaming-cursor {
+  animation: cursor-blink 1s step-end infinite;
+  font-size: 0.85em;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Markdown styles inside chat bubbles */
+.chat-markdown p { margin: 0 0 0.5em 0; }
+.chat-markdown p:last-child { margin-bottom: 0; }
+.chat-markdown ul, .chat-markdown ol { margin: 0.25em 0; padding-left: 1.25em; }
+.chat-markdown li { margin: 0.1em 0; }
+.chat-markdown code { background: rgba(255,255,255,0.1); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+.chat-markdown strong { font-weight: 600; }
