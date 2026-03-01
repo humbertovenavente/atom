@@ -15,6 +15,7 @@ export class FlowService {
   readonly edges = signal<FlowEdge[]>([]);
   readonly activeNodeId = signal<string | null>(null);
   readonly selectedNodeId = signal<string | null>(null);
+  readonly completedNodeIds = signal<Set<string>>(new Set());
 
   loadDefaultFlow(): void {
     this.http.get<FlowResponse>('/api/flow').subscribe({
@@ -40,6 +41,14 @@ export class FlowService {
 
   setActiveNode(id: string | null): void {
     this.activeNodeId.set(id);
+  }
+
+  setCompletedNode(id: string): void {
+    this.completedNodeIds.update((ids) => new Set([...ids, id]));
+  }
+
+  clearCompletedNodes(): void {
+    this.completedNodeIds.set(new Set());
   }
 
   setSelectedNode(id: string | null): void {

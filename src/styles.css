@@ -90,6 +90,13 @@ html, body {
   50% { box-shadow: 0 0 0 3px currentColor, 0 0 20px currentColor; }
 }
 
+/* Completed node dimmed state */
+.node--completed {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
 /* Animated flow edges */
 .f-connection path {
   stroke: #4B5563;
