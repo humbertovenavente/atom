@@ -27,7 +27,7 @@ export const memoryService = {
     sessionId: string,
     userMessage: string,
     assistantResponse: string,
-    update?: { intent?: string; validationData?: Record<string, unknown> }
+    update?: { intent?: string; validationData?: Record<string, unknown>; agentType?: string }
   ): Promise<void> {
     await connectDB();
     await Conversation.findOneAndUpdate(
@@ -37,7 +37,7 @@ export const memoryService = {
           messages: {
             $each: [
               { role: 'user', content: userMessage, timestamp: new Date() },
-              { role: 'assistant', content: assistantResponse, timestamp: new Date() },
+              { role: 'assistant', content: assistantResponse, timestamp: new Date(), ...(update?.agentType && { agentType: update.agentType }) },
             ],
           },
         },
