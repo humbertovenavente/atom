@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const nodeConfigSchema = new mongoose.Schema({
   systemPrompt: { type: String, default: '' },
   temperature: { type: Number, default: 0.7 },
+  botToken: { type: String, default: '' },  // Required for telegram node persistence
 }, { _id: false });
 
 const flowNodeSchema = new mongoose.Schema({
