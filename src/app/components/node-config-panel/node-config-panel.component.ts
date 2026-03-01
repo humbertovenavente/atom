@@ -71,7 +71,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         <!-- Temperature -->
         <div>
           <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
-            Temperatura: {{ currentTemp() }}
+            Temperature: {{ currentTemp() }}
           </label>
           <input
             type="range"
@@ -82,8 +82,8 @@ const DEFAULT_PROMPTS: Record<string, string> = {
             (input)="onTempChange($event)"
             class="w-full accent-blue-500" />
           <div class="flex justify-between text-xs text-gray-500 mt-1">
-            <span>0 (preciso)</span>
-            <span>2 (creativo)</span>
+            <span>0 (precise)</span>
+            <span>2 (creative)</span>
           </div>
         </div>
       </div>
