@@ -130,6 +130,7 @@ export default defineEventHandler(async (event) => {
     // Silently ignore non-text messages (stickers, photos, voice, etc.)
     const chatId = body.message?.chat?.id;
     const text = body.message?.text;
+    console.log('[telegram] update received — chatId:', chatId, 'text:', text);
     if (!chatId || !text) return { ok: true };
 
     // Load bot token from persisted flow in MongoDB
@@ -137,6 +138,7 @@ export default defineEventHandler(async (event) => {
     const flow = await Flow.findOne({ flowId: 'default' }).lean() as any;
     const telegramNode = flow?.nodes?.find((n: any) => n.type === 'telegram');
     const botToken = telegramNode?.data?.config?.botToken as string | undefined;
+    console.log('[telegram] botToken found:', !!botToken);
     if (!botToken) {
       console.warn('[telegram.post] No bot token found in flow — Telegram node not configured');
       return { ok: true };
@@ -199,7 +201,9 @@ export default defineEventHandler(async (event) => {
     }
 
     // Reply to Telegram user via Bot API (plain text, no Markdown parse_mode)
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    // TODO: revert TELEGRAM_API_BASE after testing — replace with https://api.telegram.org/bot${botToken}
+    const TELEGRAM_API_BASE = process.env['TELEGRAM_API_BASE'] ?? `https://api.telegram.org/bot${botToken}`;
+    await fetch(`${TELEGRAM_API_BASE}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text: replyText }),
