@@ -97,6 +97,13 @@ html, body {
   transition: opacity 0.5s ease, filter 0.5s ease;
 }
 
+/* Selected node for config editing — distinct from active/completed */
+.flow-node.node--selected {
+  outline: 2px dashed currentColor;
+  outline-offset: 2px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
 /* Animated flow edges */
 .f-connection path {
   stroke: #4B5563;

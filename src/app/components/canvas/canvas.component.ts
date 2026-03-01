@@ -36,6 +36,8 @@ export class CanvasComponent implements OnInit {
   @ViewChild(FZoomDirective) fZoom!: FZoomDirective;
   @ViewChild(FCanvasComponent) fCanvas!: FCanvasComponent;
 
+  private _isDragging = false;
+
   ngOnInit(): void {
     this.flowService.loadDefaultFlow();
   }
@@ -45,8 +47,16 @@ export class CanvasComponent implements OnInit {
   }
 
   onMoveNodes(event: FMoveNodesEvent): void {
+    this._isDragging = true;
     for (const moved of event.nodes) {
       this.flowService.updateNodePosition(moved.id, moved.position);
+    }
+    setTimeout(() => (this._isDragging = false), 0);
+  }
+
+  onNodeClick(nodeId: string): void {
+    if (!this._isDragging) {
+      this.flowService.setSelectedNode(nodeId);
     }
   }
 

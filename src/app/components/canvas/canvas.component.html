@@ -19,9 +19,10 @@
       class="flow-node"
       [class.node--active]="flowService.activeNodeId() === node.id"
       [class.node--completed]="flowService.completedNodeIds().has(node.id) && flowService.activeNodeId() !== node.id"
+      [class.node--selected]="flowService.selectedNodeId() === node.id"
       [style.borderColor]="node.data.color"
       [style.color]="node.data.color"
-      (click)="flowService.setSelectedNode(node.id)">
+      (click)="onNodeClick(node.id)">
 
       <!-- Output port (right side) -->
       <div
