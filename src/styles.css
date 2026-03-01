@@ -1,5 +1,68 @@
 @import 'tailwindcss';
 
+/* === Theme Variables === */
+[data-theme='dark'] {
+  --bg-primary: #1a2332;
+  --bg-secondary: #243044;
+  --bg-tertiary: #2d3b50;
+  --bg-input: #243044;
+  --border-primary: #3d4f6a;
+  --border-secondary: #4a5d7a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --accent: #60A5FA;
+  --accent-hover: #3b82f6;
+  --canvas-bg: #1a2332;
+  --node-bg: #243044;
+  --node-port-bg: #3d4f6a;
+  --node-port-border: #5a7090;
+  --edge-stroke: #3d4f6a;
+  --scrollbar-thumb: rgba(107, 114, 128, 0.4);
+  --scrollbar-hover: rgba(107, 114, 128, 0.6);
+  --minimap-bg: rgba(36, 48, 68, 0.85);
+  --minimap-border: rgba(61, 79, 106, 0.6);
+  --minimap-node: rgba(99, 131, 255, 0.5);
+  --minimap-view-fill: rgba(59, 130, 246, 0.08);
+  --minimap-view-stroke: rgba(59, 130, 246, 0.4);
+  --zoom-btn-bg: rgba(36, 48, 68, 0.9);
+  --zoom-btn-border: rgba(61, 79, 106, 0.7);
+  --zoom-btn-color: #94a3b8;
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --shadow-node-hover: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='light'] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-input: #f1f5f9;
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --canvas-bg: #f1f5f9;
+  --node-bg: #ffffff;
+  --node-port-bg: #e2e8f0;
+  --node-port-border: #94a3b8;
+  --edge-stroke: #cbd5e1;
+  --scrollbar-thumb: rgba(148, 163, 184, 0.4);
+  --scrollbar-hover: rgba(148, 163, 184, 0.6);
+  --minimap-bg: rgba(255, 255, 255, 0.9);
+  --minimap-border: rgba(226, 232, 240, 0.8);
+  --minimap-node: rgba(59, 130, 246, 0.4);
+  --minimap-view-fill: rgba(59, 130, 246, 0.06);
+  --minimap-view-stroke: rgba(59, 130, 246, 0.3);
+  --zoom-btn-bg: rgba(255, 255, 255, 0.95);
+  --zoom-btn-border: rgba(226, 232, 240, 0.9);
+  --zoom-btn-color: #64748b;
+  --code-bg: rgba(0, 0, 0, 0.05);
+  --shadow-node-hover: rgba(0, 0, 0, 0.1);
+}
+
 html, body {
   display: block;
   height: 100%;
@@ -13,7 +76,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0F172A;
+  background: var(--canvas-bg);
 }
 
 /* Ensure canvas fills available space without gaps */
@@ -27,7 +90,7 @@ f-canvas,
 .flow-node {
   min-width: 180px;
   height: 56px;
-  background: #1F2937;
+  background: var(--node-bg);
   border: 1.5px solid;
   border-radius: 10px;
   display: flex;
@@ -41,7 +104,7 @@ f-canvas,
 
 .flow-node:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--shadow-node-hover);
 }
 
 .flow-node__content {
@@ -59,7 +122,7 @@ f-canvas,
 }
 
 .flow-node__label {
-  color: white;
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -72,9 +135,9 @@ f-canvas,
 .flow-node__port {
   width: 9px;
   height: 9px;
-  background: #374151;
+  background: var(--node-port-bg);
   border-radius: 50%;
-  border: 2px solid #6B7280;
+  border: 2px solid var(--node-port-border);
   position: absolute;
   cursor: crosshair;
   transition: all 0.15s ease;
@@ -82,8 +145,8 @@ f-canvas,
 }
 
 .flow-node__port:hover {
-  background: #60A5FA;
-  border-color: #60A5FA;
+  background: var(--accent);
+  border-color: var(--accent);
   transform: translateY(-50%) scale(1.3);
   box-shadow: 0 0 6px rgba(96, 165, 250, 0.5);
 }
@@ -139,12 +202,12 @@ f-canvas,
 .flow-node.node--selected {
   outline: 2px dashed currentColor;
   outline-offset: 3px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px var(--shadow-node-hover);
 }
 
 /* Animated flow edges */
 .f-connection path {
-  stroke: #374151;
+  stroke: var(--edge-stroke);
   stroke-width: 1.5;
   stroke-dasharray: 8 4;
   animation: flow-dash 1s linear infinite;
@@ -152,7 +215,7 @@ f-canvas,
 
 .edge--active .f-connection path,
 .edge--active path {
-  stroke: #60A5FA;
+  stroke: var(--accent);
   stroke-width: 2;
   filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.6));
 }
@@ -161,14 +224,14 @@ f-canvas,
   to { stroke-dashoffset: -12; }
 }
 
-/* foblex canvas dark background — cover all layers */
+/* foblex canvas background — cover all layers */
 f-flow,
 .f-flow,
 f-canvas,
 .f-canvas,
 .f-component.f-flow,
 .f-component.f-canvas {
-  background: #0F172A !important;
+  background: var(--canvas-bg) !important;
 }
 
 /* Zoom controls — bottom-left of canvas host */
@@ -185,10 +248,10 @@ f-canvas,
 .zoom-controls button {
   width: 30px;
   height: 30px;
-  background: rgba(31, 41, 55, 0.9);
-  border: 1px solid rgba(55, 65, 81, 0.7);
+  background: var(--zoom-btn-bg);
+  border: 1px solid var(--zoom-btn-border);
   border-radius: 6px;
-  color: #9CA3AF;
+  color: var(--zoom-btn-color);
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -200,8 +263,8 @@ f-canvas,
 }
 
 .zoom-controls button:hover {
-  background: rgba(55, 65, 81, 0.9);
-  color: white;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 /* Mini-map — bottom-right of canvas */
@@ -211,8 +274,8 @@ f-canvas,
   right: 16px !important;
   width: 150px !important;
   height: 100px !important;
-  background: rgba(31, 41, 55, 0.85) !important;
-  border: 1px solid rgba(55, 65, 81, 0.6) !important;
+  background: var(--minimap-bg) !important;
+  border: 1px solid var(--minimap-border) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
   z-index: 10 !important;
@@ -220,14 +283,14 @@ f-canvas,
 }
 
 .canvas-minimap .f-minimap-node {
-  fill: rgba(99, 131, 255, 0.5);
+  fill: var(--minimap-node);
   rx: 4;
   ry: 4;
 }
 
 .canvas-minimap .f-minimap-view {
-  fill: rgba(59, 130, 246, 0.08);
-  stroke: rgba(59, 130, 246, 0.4) !important;
+  fill: var(--minimap-view-fill);
+  stroke: var(--minimap-view-stroke) !important;
   stroke-width: 1;
 }
 
@@ -242,7 +305,7 @@ f-canvas,
 .typing-indicator span {
   width: 7px;
   height: 7px;
-  background: #6B7280;
+  background: var(--text-tertiary);
   border-radius: 50%;
   animation: typing-bounce 1.4s ease-in-out infinite;
 }
@@ -259,7 +322,7 @@ f-canvas,
 .streaming-cursor {
   animation: cursor-blink 1s step-end infinite;
   font-size: 0.8em;
-  color: #60A5FA;
+  color: var(--accent);
 }
 
 @keyframes cursor-blink {
@@ -273,7 +336,7 @@ f-canvas,
 .chat-markdown ul, .chat-markdown ol { margin: 0.25em 0; padding-left: 1.25em; }
 .chat-markdown li { margin: 0.15em 0; }
 .chat-markdown code {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--code-bg);
   padding: 0.15em 0.4em;
   border-radius: 4px;
   font-size: 0.875em;
@@ -281,7 +344,7 @@ f-canvas,
 }
 .chat-markdown strong { font-weight: 600; }
 
-/* Custom scrollbar for dark theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -291,10 +354,14 @@ f-canvas,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(107, 114, 128, 0.4);
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.6);
+  background: var(--scrollbar-hover);
 }
+
+/* Helper classes for theme-aware hover/borders */
+.theme-hover:hover { background: var(--bg-tertiary); }
+.theme-border { border-color: var(--border-primary); }
