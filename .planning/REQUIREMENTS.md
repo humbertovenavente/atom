@@ -40,6 +40,14 @@
 - [ ] **CONF-04**: Botón "Reset Flow" para volver al flujo default
 - [ ] **CONF-05**: Botón "Nueva Conversación" para limpiar el chat e iniciar sesión nueva
 
+### Data & Backend
+
+- [ ] **DATA-01**: Conexión a MongoDB Atlas configurada en Nitro (usando MONGODB_URI de .env)
+- [ ] **DATA-02**: Script/seed que carga autos.json, dates.json y faq.json a MongoDB Atlas con vector embeddings
+- [ ] **DATA-03**: Atlas Vector Search index creado y funcional para búsqueda semántica
+- [ ] **DATA-04**: API routes GET /api/vehicles, GET /api/dates, GET /api/faq sirviendo datos desde MongoDB
+- [ ] **DATA-05**: Sistema de sessions: POST /api/sessions (crear), GET /api/sessions/:id (recuperar con historial)
+
 ### Services
 
 - [ ] **SERV-01**: ChatService con conexión HTTP POST al backend y parsing de SSE events
@@ -66,7 +74,6 @@
 | Feature | Reason |
 |---------|--------|
 | Backend/agentes IA | Persona B lo construye en paralelo |
-| MongoDB/base de datos | Responsabilidad de Persona B |
 | Deploy a Vercel | Se hace al final con ambos integrados |
 | Tests unitarios | Hackathon de 18h, priorizar funcionalidad |
 | Autenticación de usuarios | No es parte del MVP del hackathon |
@@ -82,33 +89,38 @@
 | SETUP-03 | Phase 1 | Pending |
 | SETUP-04 | Phase 1 | Pending |
 | SETUP-05 | Phase 1 | Pending |
-| FLOW-01 | Phase 2 | Pending |
-| FLOW-02 | Phase 2 | Pending |
-| FLOW-03 | Phase 2 | Pending |
-| FLOW-04 | Phase 2 | Pending |
-| FLOW-05 | Phase 2 | Pending |
-| FLOW-06 | Phase 2 | Pending |
-| FLOW-07 | Phase 2 | Pending |
-| CHAT-01 | Phase 3 | Pending |
-| CHAT-02 | Phase 3 | Pending |
-| CHAT-03 | Phase 3 | Pending |
-| CHAT-04 | Phase 3 | Pending |
-| CHAT-05 | Phase 3 | Pending |
-| CHAT-06 | Phase 3 | Pending |
-| CONF-01 | Phase 4 | Pending |
-| CONF-02 | Phase 4 | Pending |
-| CONF-03 | Phase 4 | Pending |
-| CONF-04 | Phase 4 | Pending |
-| CONF-05 | Phase 4 | Pending |
-| SERV-01 | Phase 3 | Pending |
-| SERV-02 | Phase 2 | Pending |
-| SERV-03 | Phase 3 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| DATA-05 | Phase 2 | Pending |
+| FLOW-01 | Phase 3 | Pending |
+| FLOW-02 | Phase 3 | Pending |
+| FLOW-03 | Phase 3 | Pending |
+| FLOW-04 | Phase 3 | Pending |
+| FLOW-05 | Phase 3 | Pending |
+| FLOW-06 | Phase 3 | Pending |
+| FLOW-07 | Phase 3 | Pending |
+| CHAT-01 | Phase 4 | Pending |
+| CHAT-02 | Phase 4 | Pending |
+| CHAT-03 | Phase 4 | Pending |
+| CHAT-04 | Phase 4 | Pending |
+| CHAT-05 | Phase 4 | Pending |
+| CHAT-06 | Phase 4 | Pending |
+| CONF-01 | Phase 5 | Pending |
+| CONF-02 | Phase 5 | Pending |
+| CONF-03 | Phase 5 | Pending |
+| CONF-04 | Phase 5 | Pending |
+| CONF-05 | Phase 5 | Pending |
+| SERV-01 | Phase 4 | Pending |
+| SERV-02 | Phase 3 | Pending |
+| SERV-03 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 26 total
-- Mapped to phases: 26
+- v1 requirements: 31 total (26 original + 5 DATA)
+- Mapped to phases: 31
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-03-01 after adding MongoDB Atlas data requirements*

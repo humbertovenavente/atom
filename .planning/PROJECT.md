@@ -32,10 +32,37 @@ El editor visual debe mostrar los nodos del flujo de agentes y resaltar en tiemp
 ### Out of Scope
 
 - Backend/agentes IA — Persona B lo construye en paralelo
-- MongoDB/base de datos — responsabilidad de Persona B
 - Deploy a Vercel — se hace al final con ambos integrados
 - Dark mode — solo si sobra tiempo
 - Tests unitarios — hackathon de 24h, priorizar funcionalidad
+
+## Databases
+
+### MongoDB Atlas — Vector DB (Knowledge Base)
+- **Cluster**: Atlas compartido (connection string en `.env` como `MONGODB_URI`)
+- **DB**: `atom_knowledge`
+- **Propósito**: Almacenar los datos de `jsons/` como embeddings vectoriales para búsqueda semántica (Atlas Vector Search)
+- **Colecciones**: `vehicles` (autos.json), `appointments` (dates.json), `faq` (faq.json)
+- **Seed**: Los JSONs de `jsons/` se suben al cluster y se vectorizan para que los agentes IA hagan RAG
+
+### MongoDB Atlas — Users & Sessions DB
+- **Cluster**: Mismo Atlas cluster
+- **DB**: `atom_sessions`
+- **Propósito**: Persistir usuarios y sus sesiones de chat
+- **Colecciones**: `users`, `sessions` (historial de conversaciones)
+
+### Credenciales
+Connection string guardado en `.env` (NO commitear). Ver `.env` para la estructura.
+
+## Data (jsons/)
+
+La carpeta `jsons/` contiene los datos fuente que se cargan a MongoDB Atlas Vector Search:
+
+- **autos.json** — Inventario de vehículos disponibles (marca, modelo, año, km, color, precio, descripción, ubicación, URL imagen). ~30+ vehículos.
+- **dates.json** — Slots de citas disponibles por fecha (para agendar test drives o visitas). Formato: `{fecha, slots[]}`.
+- **faq.json** — Preguntas frecuentes de la agencia organizadas por categoría (Vehículos, Financiamiento, Servicio, etc.).
+
+Estos JSONs definen el dominio del chatbot: es un asistente de concesionaria de autos que puede consultar inventario, agendar citas, y responder FAQs.
 
 ## Context
 
@@ -60,6 +87,7 @@ El editor visual debe mostrar los nodos del flujo de agentes y resaltar en tiemp
 | @xyflow/angular para editor | Port oficial de React Flow para Angular, nodos custom, drag & drop | — Pending |
 | SSE en lugar de WebSocket | Más simple, compatible con Vercel serverless, suficiente para streaming | — Pending |
 | Mock backend para desarrollo | Permite trabajar en paralelo sin depender de Persona B | — Pending |
+| MongoDB Atlas para datos + sesiones | Vector Search para RAG, misma infra para users/sessions | — Pending |
 
 ---
-*Last updated: 2026-02-28 after initialization*
+*Last updated: 2026-03-01 after adding MongoDB Atlas (vector + sessions)*
