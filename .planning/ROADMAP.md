@@ -2,7 +2,7 @@
 
 ## Overview
 
-Five phases deliver a working demo in ~18 hours: scaffold the Angular/Analog.js project with the correct flow library and three-panel layout, build a fully functional flow editor with custom nodes and FlowService, seed MongoDB Atlas with vectorized knowledge base data, wire up the chat panel with SSE streaming and live node highlighting, then lock in configuration controls and demo-critical polish. Each phase delivers a coherent, verifiable capability that the next phase builds on.
+Four phases deliver a working demo: scaffold the Angular/Analog.js project with the correct flow library and three-panel layout, build a fully functional flow editor with custom nodes and FlowService, seed MongoDB Atlas with vectorized knowledge base data, wire up the chat panel with SSE streaming and live node highlighting. Each phase delivers a coherent, verifiable capability that the next phase builds on.
 
 ## Phases
 
@@ -16,7 +16,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Flow Editor** - Custom nodes, drag & drop, edges, mini-map, zoom, FlowService
 - [x] **Phase 3: Data & Backend** - Seed MongoDB Atlas con vector embeddings desde jsons/, API routes para vehicles/dates/FAQ, users & sessions (completed 2026-03-01)
 - [x] **Phase 4: Chat & SSE Integration** - Chat UI, streaming, typing indicator, node highlighting, ChatService (completed 2026-03-01)
-- [ ] **Phase 5: Configuration & Polish** - Config panel, save/load flow, reset/new chat buttons
 
 ## Phase Details
 
@@ -75,26 +74,14 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] 04-01-PLAN.md — npm install + memoryService agentType support + full 4-step LLM pipeline in chat.post.ts
 - [ ] 04-02-PLAN.md — Dev server startup verification + human end-to-end verification checkpoint
 
-### Phase 5: Configuration & Polish
-**Goal**: Users can click any node to edit its configuration, persist the flow to the backend, reset to defaults, and start a new conversation — the app is demo-ready
-**Depends on**: Phase 4
-**Requirements**: CONF-01, CONF-02, CONF-03, CONF-04, CONF-05
-**Success Criteria** (what must be TRUE):
-  1. Clicking a node opens a configuration panel showing that node's editable properties (system prompt, temperature)
-  2. The flow can be saved to the backend (POST /api/flow) and reloaded (GET /api/flow) without losing node positions or configuration
-  3. "Reset Flow" returns the canvas to the default 8-node layout
-  4. "Nueva Conversacion" clears the chat history and starts a fresh session (nueva session en MongoDB)
-**Plans**: TBD
-
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
 | 3. Data & Backend | 4/4 | Done | 2026-03-01 |
-| 4. Chat & SSE Integration | 2/2 | Complete    | 2026-03-01 |
-| 5. Configuration & Polish | 0/? | Not started | - |
+| 4. Chat & SSE Integration | 2/2 | Done | 2026-03-01 |
