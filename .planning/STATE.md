@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T14:37:55.455Z"
+last_updated: "2026-03-01T15:23:25Z"
 progress:
   total_phases: 2
   completed_phases: 1
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 3 of 4 (Data & Backend)
-Plan: 1 of 3 in current phase (03-01 complete)
+Plan: 2 of 3 in current phase (03-02 complete)
 Status: In progress
-Last activity: 2026-03-01 — Plan 03-01 complete (Mongoose models + seed script with OpenAI embeddings and Atlas Vector Search)
+Last activity: 2026-03-01 — Plan 03-02 complete (API routes for vehicles/dates/sessions + VectorSearchService)
 
-Progress: [██████░░░░] 62%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████░░░░] 62%
 | Phase 02-flow-editor P02 | 2 | 2 tasks | 6 files |
 | Phase 02-flow-editor P03 | 15min | 2 tasks | 6 files |
 | Phase 03-data-backend P01 | 2min | 2 tasks | 5 files |
+| Phase 03-data-backend P02 | 1min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,10 @@ Recent decisions affecting current work:
 - [03-01]: Drop-and-reseed strategy (deleteMany + insertMany) chosen over upsert for hackathon simplicity
 - [03-01]: DateSlot has NO embedding field — date range queries only (LOCKED DECISION)
 - [03-01]: jsons/ is the authoritative data source (NOT src/server/data/)
+- [03-02]: No separate Session model — Conversation model reused for session management (locked decision confirmed)
+- [03-02]: No /api/search HTTP endpoint — vector search is internal-only for Phase 4 chat specialists
+- [03-02]: Lazy OpenAI client using LLM_API_KEY (not OPENAI_API_KEY) for VectorSearchService
+- [03-02]: GET /api/dates filters to future dates only (gte today) for demo relevance
 
 ### Pending Todos
 
@@ -97,5 +102,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-01-PLAN.md (Vehicle/FAQ/DateSlot Mongoose models + npm run seed with OpenAI embeddings and Atlas Vector Search indexes)
+Stopped at: Completed 03-02-PLAN.md (API routes for vehicles/dates/sessions + VectorSearchService with $vectorSearch aggregation)
 Resume file: None
