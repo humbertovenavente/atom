@@ -3,7 +3,7 @@ import { FlowService } from '../../services/flow.service';
 import { NodeConfigPanelComponent } from '../node-config-panel/node-config-panel.component';
 
 interface NodeTypeConfig {
-  type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool';
+  type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool' | 'telegram';
   label: string;
   icon: string;
   color: string;
@@ -17,6 +17,7 @@ const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
   { type: 'specialist', label: 'Especialista', icon: 'zap', color: '#F59E0B', description: 'Experto en dominio específico' },
   { type: 'generic', label: 'Genérico', icon: 'message-circle', color: '#6B7280', description: 'Respuestas generales' },
   { type: 'tool', label: 'Herramienta', icon: 'tool', color: '#EF4444', description: 'Herramienta externa' },
+  { type: 'telegram', label: 'Telegram', icon: 'send', color: '#0088CC', description: 'Canal de entrada desde Telegram' },
 ];
 
 const EMOJI_MAP: Record<string, string> = {
@@ -26,6 +27,7 @@ const EMOJI_MAP: Record<string, string> = {
   zap: '⚡',
   'message-circle': '💬',
   tool: '🔧',
+  send: '✈️',
 };
 
 @Component({
