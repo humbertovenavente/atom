@@ -11,6 +11,105 @@ html, body {
   height: 100%;
 }
 
+/* Flow node card */
+.flow-node {
+  width: 180px;
+  height: 60px;
+  background: #1F2937;
+  border: 2px solid;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.3s ease;
+  position: relative;
+}
+
+.flow-node__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  width: 100%;
+  flex: 1;
+}
+
+.flow-node__icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.flow-node__label {
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Port dots (input/output connectors) */
+.flow-node__port {
+  width: 10px;
+  height: 10px;
+  background: #4B5563;
+  border-radius: 50%;
+  border: 2px solid #9CA3AF;
+  position: absolute;
+  cursor: crosshair;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.flow-node__port:hover {
+  background: #60A5FA;
+  border-color: #60A5FA;
+}
+
+.flow-node__port--out {
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.flow-node__port--in {
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Active node pulse animation */
+.node--active {
+  box-shadow: 0 0 0 2px currentColor, 0 0 12px currentColor;
+  animation: node-pulse 2s ease-in-out infinite;
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px currentColor, 0 0 8px currentColor; }
+  50% { box-shadow: 0 0 0 3px currentColor, 0 0 20px currentColor; }
+}
+
+/* Animated flow edges */
+.f-connection path {
+  stroke: #4B5563;
+  stroke-width: 2;
+  stroke-dasharray: 8 4;
+  animation: flow-dash 1s linear infinite;
+}
+
+.edge--active .f-connection path,
+.edge--active path {
+  stroke: #60A5FA;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px #60A5FA);
+}
+
+@keyframes flow-dash {
+  to { stroke-dashoffset: -12; }
+}
+
+/* foblex canvas dark background */
 .f-canvas {
-  background: #111827;
+  background: #111827 !important;
 }
