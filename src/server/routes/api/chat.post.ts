@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 import { defineEventHandler, readBody, setHeader } from 'h3';
 import { createEmitter } from '../../sse/emitter';
 import type { ChatRequest, OrchestratorResult, ValidatorResult } from '../../../shared/types';
@@ -9,18 +9,17 @@ export const config = {
   maxDuration: 60,
 };
 
-// Lazy OpenAI client singleton
-let openaiClient: OpenAI | null = null;
-function getOpenAI(): OpenAI {
-  if (!openaiClient) {
+// Lazy Gemini client singleton
+let genaiClient: GoogleGenAI | null = null;
+function getGenAI(): GoogleGenAI {
+  if (!genaiClient) {
     const apiKey = process.env['LLM_API_KEY'];
-    const baseURL = process.env['LLM_BASE_URL'];
     if (!apiKey) throw new Error('LLM_API_KEY is not set');
-    openaiClient = new OpenAI({ apiKey, ...(baseURL && { baseURL }) });
+    genaiClient = new GoogleGenAI({ apiKey });
   }
-  return openaiClient;
+  return genaiClient;
 }
-const MODEL = () => process.env['LLM_MODEL'] ?? 'gpt-4o';
+const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.0-flash-001';
 
 // Orchestrator system prompt and intent classification helper
 const ORCHESTRATOR_SYSTEM = `Eres un clasificador de intenciones para un asistente de agencia de autos.
@@ -37,16 +36,16 @@ Omite campos extracted que no estén presentes en el mensaje. Usa null para camp
 async function classifyIntent(
   message: string
 ): Promise<{ intent: OrchestratorResult['intent']; extracted: Record<string, unknown> }> {
-  const completion = await getOpenAI().chat.completions.create({
+  const response = await getGenAI().models.generateContent({
     model: MODEL(),
-    messages: [
-      { role: 'system', content: ORCHESTRATOR_SYSTEM },
-      { role: 'user', content: message },
-    ],
-    stream: false,
+    contents: [{ role: 'user', parts: [{ text: message }] }],
+    config: { systemInstruction: ORCHESTRATOR_SYSTEM },
   });
   try {
-    const raw = JSON.parse(completion.choices[0].message.content ?? '{}');
+    const text = response.text ?? '';
+    // Strip markdown code fences if present
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+    const raw = JSON.parse(cleaned);
     const validIntents = ['faqs', 'catalog', 'schedule', 'generic'] as const;
     const intent = validIntents.includes(raw.intent) ? raw.intent : 'generic';
     const extracted: Record<string, unknown> = {};
@@ -175,24 +174,23 @@ export default defineEventHandler(async (event) => {
       vectorSearchService.searchFAQs(message, 3),
     ]);
     const systemPrompt = buildSpecialistPrompt(vehicles, faqs, validationResult.collectedData, intent);
-    const history = memory.messages.map((m) => ({
-      role: m.role as 'user' | 'assistant' | 'system',
-      content: m.content,
-    }));
+    // Map history to Gemini format (assistant → model, skip system messages)
+    const history = memory.messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
 
-    const stream = await getOpenAI().chat.completions.create({
+    const stream = await getGenAI().models.generateContentStream({
       model: MODEL(),
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...history,
-        { role: 'user', content: message },
-      ],
-      stream: true,
+      contents: [...history, { role: 'user', parts: [{ text: message }] }],
+      config: { systemInstruction: systemPrompt },
     });
 
     let fullResponse = '';
     for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content ?? '';
+      const content = chunk.text ?? '';
       if (content) {
         emit('message_chunk', { content });
         fullResponse += content;
