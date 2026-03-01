@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 4 of 4 (Chat SSE Integration)
-Plan: 2 of 2 in current phase (04-02 complete)
-Status: Complete
-Last activity: 2026-03-01 — Plan 04-02 complete (human verified all 4 e2e scenarios: streaming, node highlighting, multi-turn, session persistence)
+Phase: 6 of 6 (Fix Appointment Booking Persistence Bug)
+Plan: 1 of 2 in current phase (06-01 complete)
+Status: In Progress
+Last activity: 2026-03-01 — Plan 06-01 complete (type contracts established: SSEEventType extended, AgentType extended, getAvailableSlots exported, booking node added to flow pipeline)
 
-Progress: [██████████] 100%
+Progress: [████████--] 75%
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [██████████] 100%
 - Trend: decreasing (simple tasks)
 
 *Updated after each plan completion*
+| Phase 06-fix-appointment-booking-persistence-bug P01 | 5min | 2 tasks | 4 files |
 | Phase 02-flow-editor P01 | 5min | 2 tasks | 10 files |
 | Phase 02-flow-editor P02 | 2 | 2 tasks | 6 files |
 | Phase 02-flow-editor P03 | 15min | 2 tasks | 6 files |
@@ -109,6 +110,12 @@ Recent decisions affecting current work:
 - [04-01]: Orchestrator extracts field values from user message in same LLM call as intent classification — merges with existing validationData from MongoDB
 - [04-01]: Lazy OpenAI singleton for chat using LLM_API_KEY/LLM_BASE_URL/LLM_MODEL — same env var pattern as vectorSearchService
 - [04-02]: Phase 4 end-to-end verified — all 4 manual tests passed: generic streaming, catalog multi-turn field collection, schedule multi-turn appointment, session persistence
+- [06-01]: getAvailableSlots exported as named export — requires own connectDB() call since it may be called outside bookAppointment context
+- [06-01]: Booking flow node uses type 'tool' (matching tool-search pattern) — no new FlowNode type required
+
+### Roadmap Evolution
+
+- Phase 6 added: Fix appointment booking persistence bug
 
 ### Pending Todos
 
@@ -122,5 +129,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 04-02-PLAN.md (human verification — all 4 e2e tests passed, Phase 4 complete)
+Stopped at: Completed 06-01-PLAN.md (type contracts for booking — Plan 02 can now implement the full booking persistence fix)
 Resume file: None
