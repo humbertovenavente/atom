@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T18:20:47.093Z"
+last_updated: "2026-03-01T19:16:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 3 of 4 (Data & Backend — gap closure complete)
-Plan: 4 of 4 in current phase (03-04 complete — PHASE COMPLETE)
-Status: Complete
-Last activity: 2026-03-01 — Plan 03-04 complete (seed.ts English field names, faq_vector_index, GET /api/faq)
+Phase: 4 of 4 (Chat SSE Integration)
+Plan: 1 of 1 in current phase (04-01 complete)
+Status: In Progress
+Last activity: 2026-03-01 — Plan 04-01 complete (real 4-step LLM agent pipeline with OpenAI streaming)
 
 Progress: [██████████] 100%
 
@@ -104,6 +104,9 @@ Recent decisions affecting current work:
 - [03-04]: seed.ts uses LLM_API_KEY (not GEMINI_API_KEY) — single canonical env var for all LLM/embedding operations
 - [03-04]: faq_vector_index is the canonical Atlas index name — seed and VectorSearchService now consistent
 - [03-04]: GET /api/faq follows vehicles.get.ts pattern — no filtering, embedding: 0 projection, lean()
+- [04-01]: Validator short-circuits pipeline when required fields missing — asks targeted Spanish question, skips Specialist LLM call entirely
+- [04-01]: Orchestrator extracts field values from user message in same LLM call as intent classification — merges with existing validationData from MongoDB
+- [04-01]: Lazy OpenAI singleton for chat using LLM_API_KEY/LLM_BASE_URL/LLM_MODEL — same env var pattern as vectorSearchService
 
 ### Pending Todos
 
@@ -117,5 +120,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-04-PLAN.md (seed.ts gap closure + GET /api/faq — Phase 3 fully complete)
+Stopped at: Completed 04-01-PLAN.md (real 4-step LLM agent pipeline: Memory -> Orchestrator -> Validator -> Specialist with SSE streaming)
 Resume file: None
