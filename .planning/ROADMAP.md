@@ -54,10 +54,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. GET /api/vehicles devuelve autos desde MongoDB (no desde archivo estático)
   4. GET /api/dates devuelve slots disponibles desde MongoDB
   5. POST /api/sessions crea una sesión nueva y GET /api/sessions/:id la recupera con su historial
-**Plans**: 3 plans
+**Plans**: 4 plans
 - [x] 03-01-PLAN.md — Mongoose models (Vehicle, FAQ, DateSlot) + seed script with Gemini embeddings + Atlas Vector Search indexes
 - [x] 03-02-PLAN.md — API routes (vehicles, dates, sessions) + VectorSearchService for semantic search
-- [ ] 03-03-PLAN.md — Schema alignment (English field names), VectorSearchService fixes, session GET fix, chat.post.ts rewiring to MongoDB, delete static data layer
+- [x] 03-03-PLAN.md — Schema alignment (English field names), VectorSearchService fixes, session GET fix, chat.post.ts rewiring to MongoDB, delete static data layer
+- [ ] 03-04-PLAN.md — Gap closure: fix seed.ts field names + index name + LLM_API_KEY, create GET /api/faq route
 
 ### Phase 4: Chat & SSE Integration
 **Goal**: A working chat playground where messages stream in token-by-token via SSE, and the corresponding flow nodes illuminate in real time as the agent executes — backed by real MongoDB data
@@ -92,6 +93,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Setup | 3/3 | Done | Yes |
 | 2. Flow Editor | 3/3 | Done | Yes |
-| 3. Data & Backend | 3/1 | Complete   | 2026-03-01 |
+| 3. Data & Backend | 3/4 | Gap closure pending | 2026-03-01 |
 | 4. Chat & SSE Integration | 0/? | Not started | - |
 | 5. Configuration & Polish | 0/? | Not started | - |
