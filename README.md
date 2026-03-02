@@ -1,396 +1,415 @@
-# 🤖 AI Agent Builder — Concesionaria de Autos
+# ATOM — AI Agent Builder para Concesionaria de Autos
 
-> Plataforma fullstack con editor visual de flujos para construir y probar agentes de IA conversacionales aplicados a una concesionaria de autos.
+> Plataforma fullstack con editor visual de flujos para construir y probar agentes de IA conversacionales multi-agente, aplicados a una concesionaria de autos. Incluye chat en vivo con streaming y canal de Telegram.
 
 **Dev Day Atom 2026** — Hackathon Challenge
 
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
-- [Demo](#-demo)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Arquitectura](#-arquitectura)
-- [Flujo del Agente](#-flujo-del-agente)
-- [Casos de Uso](#-casos-de-uso)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Configuración Local](#-configuración-local)
-- [Decisiones Técnicas](#-decisiones-técnicas)
-- [División de Tareas](#-división-de-tareas)
-
----
-
-## 🚀 Demo
-
-- **URL de producción:** `[INSERTAR URL DE VERCEL]`
-- **Repositorio:** `[INSERTAR URL DE GITHUB]`
+- [Demo](#demo)
+- [Stack Tecnologico](#stack-tecnologico)
+- [Arquitectura](#arquitectura)
+- [Pipeline Multi-Agente](#pipeline-multi-agente)
+- [Canales de Comunicacion](#canales-de-comunicacion)
+- [Casos de Uso](#casos-de-uso)
+- [API Endpoints](#api-endpoints)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Configuracion Local](#configuracion-local)
+- [Decisiones Tecnicas](#decisiones-tecnicas)
 
 ---
 
-## 🛠 Stack Tecnológico
+## Demo
 
-| Capa | Tecnología | Versión |
+- **Produccion:** https://atom-one-phi.vercel.app/
+- **Repositorio:** https://github.com/humbertovenavente/atom
+
+---
+
+## Stack Tecnologico
+
+| Capa | Tecnologia | Version |
 |------|-----------|---------|
-| **Meta-framework** | Analog.js | 2.x |
-| **Frontend** | Angular + TypeScript | 17+ |
-| **Editor Visual** | @xyflow/angular (Angular Flow) | latest |
-| **Styling** | Tailwind CSS | 3.x |
+| **Meta-framework** | Analog.js | 2.3.0 |
+| **Frontend** | Angular + TypeScript | 21 |
+| **Editor Visual** | @foblex/flow | 18.1.2 |
+| **Styling** | Tailwind CSS | 4.2 |
 | **Backend** | Nitro/H3 (API routes de Analog) | — |
-| **Base de Datos** | MongoDB Atlas | 7.x |
-| **Framework IA** | LangChain.js | latest |
-| **LLM** | [MODELO ASIGNADO] | — |
-| **Deploy** | Vercel | — |
+| **Base de Datos** | MongoDB Atlas + Mongoose | 9.x |
+| **LLM** | Google Gemini 2.5 Flash | via @google/genai |
+| **Busqueda Semantica** | MongoDB Atlas Vector Search | embeddings propios |
+| **Canal Externo** | Telegram Bot API | webhooks |
+| **Deploy** | Vercel | zero-config |
 
-### ¿Por qué este stack?
+### Por que este stack?
 
-**Analog.js** — Elegimos el meta-framework fullstack oficial de Angular porque:
-- Un solo proyecto = frontend + backend (API routes) en un monolito cohesivo
-- File-based routing para páginas y API endpoints
-- Deploy unificado a Vercel (zero-config)
-- Powered by Vite (DX rápido) y Nitro (server routes de producción)
-- Alineado con el ecosistema Angular que usa Atom como referencia
+**Analog.js** — Meta-framework fullstack oficial de Angular. Un solo proyecto = frontend + backend (API routes) en un monolito cohesivo. File-based routing, deploy unificado a Vercel, powered by Vite + Nitro.
 
-**@xyflow/angular** — Librería madura para editores de nodos con soporte nativo Angular. Drag & drop, conexiones, mini-mapa, zoom, y nodos custom out-of-the-box.
+**@foblex/flow** — Libreria de editor de nodos con soporte nativo Angular. Drag & drop, conexiones, zoom, y nodos custom para visualizar el pipeline de agentes.
 
-**MongoDB Atlas** — Base de datos NoSQL que nos da:
-- Flexibilidad para almacenar conversaciones con estructura variable
-- Memoria persistente entre sesiones (+5 pts bonus)
-- Free tier suficiente para el hackathon
-- Driver nativo para Node.js/Nitro
+**MongoDB Atlas** — Base de datos NoSQL con:
+- Almacenamiento flexible de conversaciones y flujos
+- Vector Search para busqueda semantica en vehiculos y FAQs
+- Memoria persistente entre sesiones
+- Colecciones separadas para conocimiento (`atom_knowledge`) y sesiones (`atom_sessions`)
 
-**LangChain.js** — Orquestación multi-agente con:
-- Chains para encadenar lógica de agentes
-- Prompt templates reutilizables
-- Integración nativa con múltiples LLMs
-- Memory management built-in
+**Google Gemini 2.5 Flash** — LLM rapido y capaz para clasificacion de intenciones, validacion conversacional, y generacion de respuestas especializadas. Usado directamente via `@google/genai` SDK sin frameworks intermediarios.
 
 ---
 
-## 🏗 Arquitectura
+## Arquitectura
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                    ANALOG.JS (Vercel)                  │
-│                                                        │
-│  ┌─────────────────────┐  ┌────────────────────────┐  │
-│  │   FRONTEND (Angular) │  │  BACKEND (Nitro/H3)    │  │
-│  │                       │  │                        │  │
-│  │  ┌───────────────┐   │  │  /api/chat.post.ts     │  │
-│  │  │  Flow Editor   │   │  │  ┌──────────────────┐  │  │
-│  │  │  (@xyflow)     │───│──│─▶│  Orchestration   │  │  │
-│  │  │               │   │  │  │     Layer         │  │  │
-│  │  │  🧠🎯✅🤖💬🔧│   │  │  │                  │  │  │
-│  │  └───────────────┘   │  │  │  Orchestrator 🎯  │  │  │
-│  │                       │  │  │    ├─ Validator ✅ │  │  │
-│  │  ┌───────────────┐   │  │  │    ├─ Specialist🤖│  │  │
-│  │  │  Playground    │   │  │  │    ├─ Generic  💬 │  │  │
-│  │  │  (Chat Live)   │───│──│─▶│    └─ Memory   🧠│  │  │
-│  │  │               │   │  │  └──────────┬───────┘  │  │
-│  │  └───────────────┘   │  │             │          │  │
-│  └─────────────────────┘  │  ┌──────────▼───────┐  │  │
-│                            │  │  Tool Layer 🔧   │  │  │
-│                            │  │  ├─ faqs.json     │  │  │
-│                            │  │  ├─ catalog.json  │  │  │
-│                            │  │  └─ schedule.json │  │  │
-│                            │  └──────────────────┘  │  │
-│                            │          │              │  │
-│                            │  ┌───────▼──────────┐  │  │
-│                            │  │  MongoDB Atlas    │  │  │
-│                            │  │  (Memoria +       │  │  │
-│                            │  │   Conversaciones) │  │  │
-│                            │  └──────────────────┘  │  │
-│                            └────────────────────────┘  │
-└──────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     ANALOG.JS (Vercel)                          │
+│                                                                 │
+│  ┌──────────────────────┐    ┌────────────────────────────────┐ │
+│  │   FRONTEND (Angular)  │    │   BACKEND (Nitro/H3)           │ │
+│  │                        │    │                                │ │
+│  │  ┌────────────────┐   │    │   /api/chat.post.ts (SSE)      │ │
+│  │  │  Flow Editor    │   │    │   /api/telegram.post.ts        │ │
+│  │  │  (@foblex/flow) │───│───▶│                                │ │
+│  │  │  Canvas + Sidebar│   │    │   ┌────────────────────────┐  │ │
+│  │  └────────────────┘   │    │   │  Multi-Agent Pipeline   │  │ │
+│  │                        │    │   │                        │  │ │
+│  │  ┌────────────────┐   │    │   │  Memory       → load   │  │ │
+│  │  │  Chat Panel     │   │    │   │  Orchestrator → intent │  │ │
+│  │  │  (SSE streaming)│───│───▶│   │  Validator    → fields │  │ │
+│  │  │                 │   │    │   │  Booking      → slots  │  │ │
+│  │  └────────────────┘   │    │   │  Specialist   → reply  │  │ │
+│  │                        │    │   │  Memory       → save   │  │ │
+│  │  ┌────────────────┐   │    │   └────────────┬───────────┘  │ │
+│  │  │  Config Panel   │   │    │                │              │ │
+│  │  │  (per-node)     │   │    │   ┌────────────▼───────────┐  │ │
+│  │  └────────────────┘   │    │   │  Vector Search Service  │  │ │
+│  └──────────────────────┘    │   │  (vehicles + FAQs)      │  │ │
+│                                │   └────────────┬───────────┘  │ │
+│  ┌──────────────────────┐    │                │              │ │
+│  │   TELEGRAM            │    │   ┌────────────▼───────────┐  │ │
+│  │   Bot API (webhook)   │───▶│   │  MongoDB Atlas         │  │ │
+│  └──────────────────────┘    │   │  Conversations + Flows  │  │ │
+│                                │   │  Vehicles + FAQs       │  │ │
+│                                │   │  Appointments + Books  │  │ │
+│                                │   └────────────────────────┘  │ │
+│                                └────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Patrón de Comunicación
+### Patron de Comunicacion
 
-1. **Frontend → Backend**: HTTP POST a `/api/chat` con mensaje del usuario + session ID
-2. **Backend → Frontend**: Server-Sent Events (SSE) para streaming de respuestas
-3. **Backend → MongoDB**: Lectura/escritura de memoria conversacional
-4. **Backend → JSON Tools**: Consulta a archivos estáticos para datos del negocio
-5. **Backend → LLM**: Llamadas a la API del modelo para cada agente
+1. **Web Chat → Backend**: HTTP POST a `/api/chat` → respuesta via Server-Sent Events (SSE) para streaming en tiempo real
+2. **Telegram → Backend**: Telegram envia webhook POST a `/api/telegram` → respuesta completa via Bot API `sendMessage`
+3. **Backend → MongoDB**: Lectura/escritura de memoria conversacional, flujos, vehiculos, FAQs, citas
+4. **Backend → Vector Search**: Busqueda semantica de vehiculos y FAQs relevantes al mensaje del usuario
+5. **Backend → Gemini**: Llamadas al LLM para clasificacion de intenciones y generacion de respuestas
 
 ---
 
-## 🔄 Flujo del Agente
+## Pipeline Multi-Agente
 
 ```
-📨 Mensaje del usuario
+Mensaje del usuario (Web Chat o Telegram)
      │
      ▼
-🧠 MEMORIA ──────────── Lee contexto previo de MongoDB
+ MEMORIA ──────────────── Carga historial de conversacion desde MongoDB
      │
      ▼
-🎯 ORQUESTADOR ──────── Clasifica intención del mensaje
+ ORQUESTADOR ──────────── Clasifica intencion con Gemini (+ fecha actual para resolver "manana", etc.)
+     │                     Extrae campos: nombre, fecha, hora, presupuesto, tipo vehiculo
      │
-     ├─── intent: "faqs"      → ✅ Validador FAQs      → 🤖 Especialista FAQs
-     ├─── intent: "catalog"   → ✅ Validador Catálogo   → 🤖 Especialista Catálogo
-     ├─── intent: "schedule"  → ✅ Validador Agenda     → 🤖 Especialista Agenda
-     └─── intent: "generic"   → 💬 Agente Genérico
-                                      │
-                                      ▼
-                              🧠 MEMORIA ──── Guarda contexto en MongoDB
-                                      │
-                                      ▼
-                              📤 Respuesta al usuario
+     ├── intent: "catalog"   ──┐
+     ├── intent: "schedule"  ──┤
+     ├── intent: "faqs"      ──┤
+     └── intent: "generic"   ──┘
+                                │
+                                ▼
+ VALIDADOR ────────────── Verifica campos requeridos con datos acumulados
+     │                     schedule: fullName, preferredDate, preferredTime
+     │                     catalog: budget, vehicleType
+     │
+     ▼
+ BOOKING ─────────────── (Solo schedule) Cuando todos los campos estan completos:
+     │                     - Busca horarios disponibles reales desde MongoDB
+     │                     - Intenta reservar la cita
+     │                     - Maneja conflictos (slot ocupado, dia lleno)
+     │
+     ▼
+ ESPECIALISTA ─────────── Vector search (vehiculos + FAQs) + respuesta con Gemini
+     │                     - Prompt conversacional (nunca tipo formulario)
+     │                     - Inyecta horarios disponibles reales
+     │                     - Contexto de datos recopilados del cliente
+     │
+     ▼
+ MEMORIA ──────────────── Guarda turno completo en MongoDB (mensaje + respuesta + validationData)
+     │
+     ▼
+ Respuesta al usuario
 ```
 
-### Descripción de cada Nodo
+### Descripcion de cada Agente
 
-| Nodo | Responsabilidad | Input | Output |
-|------|----------------|-------|--------|
-| **Memoria 🧠** | Recupera y persiste el contexto conversacional | session_id | conversation_history |
-| **Orquestador 🎯** | Analiza intención y rutea al agente correcto | mensaje + contexto | intent + confidence |
-| **Validador ✅** | Recopila datos necesarios del usuario de forma conversacional | mensaje + datos_faltantes | datos_completos o pregunta_siguiente |
-| **Especialista 🤖** | Resuelve el caso consultando la fuente de datos | datos_validados + tool | respuesta_personalizada |
-| **Genérico 💬** | Maneja saludos, despedidas y fuera de scope | mensaje | respuesta_cortés |
-| **Tool/JSON 🔧** | Fuente de datos estática | query/filtros | datos_crudos |
+| Agente | Responsabilidad |
+|--------|----------------|
+| **Memoria** | Carga y persiste historial conversacional + datos de validacion acumulados por sesion |
+| **Orquestador** | Clasifica intencion (catalog/schedule/faqs/generic) y extrae campos del mensaje. Inyecta fecha actual para resolver fechas relativas |
+| **Validador** | Verifica que los campos requeridos esten completos. No usa LLM — es logica pura |
+| **Booking** | Reserva citas en MongoDB. Busca slots disponibles, valida disponibilidad, maneja conflictos. Se activa automaticamente cuando los 3 campos de schedule estan completos (fields-first) |
+| **Especialista** | Genera respuesta final con Gemini usando contexto vectorial (vehiculos/FAQs), datos del cliente, y reglas conversacionales. Nunca hace preguntas tipo formulario |
+
+### Fields-First Booking
+
+El sistema usa un enfoque "fields-first": cuando detecta que los 3 campos de cita (nombre, fecha, hora) estan completos — sin importar la intencion clasificada — automaticamente intenta reservar. Esto permite que un usuario que da toda la info en un solo mensaje obtenga su cita sin pasos intermedios.
 
 ---
 
-## 📦 Casos de Uso
+## Canales de Comunicacion
+
+### Web Chat (SSE Streaming)
+
+- **Endpoint**: `POST /api/chat`
+- **Protocolo**: Server-Sent Events para streaming token por token
+- **Eventos SSE**: `agent_active` (nodo procesando/completo), `message_chunk` (texto parcial), `booking_confirmed`, `booking_failed`, `done`, `error`
+- **Session ID**: UUID generado por el frontend, persistido en localStorage
+
+### Telegram Bot
+
+- **Endpoint**: `POST /api/telegram` (webhook)
+- **Protocolo**: Respuesta completa (no streaming) — Telegram requiere mensaje completo
+- **Session ID**: `telegram-{chatId}` — completamente aislado del web chat
+- **Configuracion**: Bot token almacenado en el flujo de MongoDB, configurable desde el panel del nodo Telegram en el editor visual
+- **Registro**: Boton "Register Webhook" en el config panel llama a `setWebhook` de Telegram apuntando al dominio actual
+
+Ambos canales ejecutan exactamente el mismo pipeline multi-agente (memoria → orquestador → validador → booking → especialista).
+
+---
+
+## Casos de Uso
 
 ### Caso 1 — Consultas Generales (FAQs)
 
-**Escenario**: El usuario pregunta sobre horarios, ubicación, financiamiento, garantías, etc.
+El usuario pregunta sobre horarios, ubicacion, financiamiento, garantias, politicas de la concesionaria. El especialista busca FAQs relevantes via vector search y responde directamente. No se requiere recopilar datos adicionales.
 
-**Flujo del Validador** — Recopila antes de responder:
-1. ¿Eres cliente nuevo o existente?
-2. ¿Eres asalariado o independiente?
-3. Edad aproximada
+### Caso 2 — Catalogo de Vehiculos
 
-**Personalización**: El Especialista adapta la respuesta de FAQs según el perfil. Un cliente nuevo asalariado joven recibe info diferente a un cliente existente independiente.
+El usuario busca autos disponibles, precios, comparativas. El sistema recopila conversacionalmente presupuesto y tipo de vehiculo preferido, luego busca vehiculos relevantes via vector search y hace recomendaciones personalizadas.
 
-**Tool**: `faqs.json` — Preguntas frecuentes categorizadas con respuestas parametrizadas.
+### Caso 3 — Agendamiento de Citas
 
----
+El usuario quiere agendar una cita o prueba de manejo. El sistema recopila nombre, fecha y hora de forma conversacional. Muestra unicamente horarios reales disponibles desde la base de datos. Cuando los 3 campos estan completos, reserva automaticamente y confirma al usuario.
 
-### Caso 2 — Catálogo de Vehículos
-
-**Escenario**: El usuario busca autos disponibles, precios, comparativas.
-
-**Flujo del Validador** — Recopila antes de mostrar opciones:
-1. Presupuesto aproximado
-2. ¿Nuevo o usado?
-3. ¿Cuenta con descuento de empleado?
-4. Preferencia de tipo (sedán, SUV, pickup, etc.)
-
-**Personalización**: El Especialista filtra el catálogo y recomienda opciones basadas en el perfil.
-
-**Tool**: `catalog.json` — Inventario con precios, colores, disponibilidad y características.
+**Flujo de booking**:
+- Horarios disponibles se cargan desde MongoDB (coleccion `books` con slots por fecha)
+- Maximo 4 citas por dia
+- Si el slot esta ocupado, muestra alternativas disponibles
+- Si el dia esta lleno, sugiere otra fecha
 
 ---
 
-### Caso 3 — Agendamiento de Cita
+## API Endpoints
 
-**Escenario**: El usuario quiere agendar prueba de manejo o cita con asesor.
-
-**Flujo del Validador** — Recopila:
-1. Nombre completo
-2. Fecha preferida
-3. Hora preferida
-4. Motivo (prueba de manejo o asesoría)
-5. Vehículo de interés (si aplica)
-
-**Personalización**: El Especialista consulta disponibilidad y confirma o propone alternativas.
-
-**Tool**: `schedule.json` — Disponibilidad de asesores por fecha y hora.
+| Metodo | Ruta | Descripcion |
+|--------|------|-------------|
+| `POST` | `/api/chat` | Chat principal — SSE streaming con pipeline multi-agente |
+| `POST` | `/api/telegram` | Webhook de Telegram — mismo pipeline, respuesta completa |
+| `GET` | `/api/flow` | Cargar configuracion del flujo visual |
+| `POST` | `/api/flow` | Guardar configuracion del flujo visual |
+| `GET` | `/api/sessions` | Listar sesiones de conversacion |
+| `POST` | `/api/sessions` | Crear nueva sesion |
+| `GET` | `/api/sessions/:id` | Obtener sesion especifica con historial |
+| `PATCH` | `/api/sessions/:id` | Actualizar sesion (renombrar) |
+| `DELETE` | `/api/sessions/:id` | Eliminar sesion |
+| `GET` | `/api/vehicles` | Listar vehiculos del catalogo |
+| `GET` | `/api/faq` | Listar preguntas frecuentes |
+| `GET` | `/api/dates` | Obtener fechas con disponibilidad |
+| `POST` | `/api/appointments` | Crear cita manualmente |
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
-ai-agent-builder/
+atom/
 ├── src/
 │   ├── app/
-│   │   ├── pages/
-│   │   │   ├── (home).page.ts                 # Landing → redirige al editor
-│   │   │   └── editor.page.ts                 # Página principal
-│   │   │
 │   │   ├── components/
-│   │   │   ├── flow-editor/                   # Editor visual
-│   │   │   │   ├── flow-editor.component.ts   # Canvas principal (@xyflow)
-│   │   │   │   ├── flow-editor.component.html
-│   │   │   │   ├── nodes/                     # Nodos custom
-│   │   │   │   │   ├── memory-node.component.ts
-│   │   │   │   │   ├── orchestrator-node.component.ts
-│   │   │   │   │   ├── validator-node.component.ts
-│   │   │   │   │   ├── specialist-node.component.ts
-│   │   │   │   │   ├── generic-node.component.ts
-│   │   │   │   │   └── tool-node.component.ts
-│   │   │   │   └── config-panel/              # Panel de configuración
-│   │   │   │       └── config-panel.component.ts
-│   │   │   │
-│   │   │   └── playground/                    # Chat live
-│   │   │       ├── chat-window.component.ts
-│   │   │       └── message-bubble.component.ts
+│   │   │   ├── canvas/                    # Canvas principal del editor (@foblex/flow)
+│   │   │   ├── sidebar/                   # Paleta de nodos arrastrables
+│   │   │   ├── flow-toolbar/              # Barra de herramientas del editor
+│   │   │   ├── node-config-panel/         # Panel de configuracion por nodo (prompt, temp, bot token)
+│   │   │   └── chat/                      # Panel de chat con SSE streaming
 │   │   │
 │   │   ├── services/
-│   │   │   ├── chat.service.ts                # HTTP → /api/chat
-│   │   │   └── flow.service.ts                # Estado del editor
+│   │   │   ├── chat.service.ts            # Cliente HTTP para /api/chat con parsing SSE
+│   │   │   ├── flow.service.ts            # Estado reactivo del editor (nodos, edges, seleccion)
+│   │   │   ├── i18n.service.ts            # Internacionalizacion (espanol/ingles)
+│   │   │   └── theme.service.ts           # Tema claro/oscuro
 │   │   │
-│   │   └── models/
-│   │       └── types.ts                       # Interfaces compartidas
+│   │   └── pages/
+│   │       └── index.page.ts              # Pagina principal (editor + chat)
 │   │
-│   └── server/
-│       └── routes/
-│           └── api/
-│               ├── chat.post.ts               # POST /api/chat
-│               ├── flow.post.ts               # POST /api/flow (guardar)
-│               ├── flow.get.ts                # GET /api/flow (cargar)
-│               │
-│               ├── agents/                    # Lógica de agentes
-│               │   ├── orchestrator.ts
-│               │   ├── validator.ts
-│               │   ├── specialist.ts
-│               │   ├── generic.ts
-│               │   └── memory.ts
-│               │
-│               └── data/                      # JSONs estáticos
-│                   ├── faqs.json
-│                   ├── catalog.json
-│                   └── schedule.json
+│   ├── server/
+│   │   ├── routes/api/
+│   │   │   ├── chat.post.ts              # Pipeline multi-agente con SSE streaming
+│   │   │   ├── telegram.post.ts          # Pipeline multi-agente para Telegram (no streaming)
+│   │   │   ├── flow.get.ts              # Cargar flujo
+│   │   │   ├── flow.post.ts             # Guardar flujo
+│   │   │   ├── sessions.get.ts          # CRUD sesiones
+│   │   │   ├── sessions.post.ts
+│   │   │   ├── sessions/[id].get.ts
+│   │   │   ├── sessions/[id].patch.ts
+│   │   │   ├── sessions/[id].delete.ts
+│   │   │   ├── vehicles.get.ts          # Catalogo de vehiculos
+│   │   │   ├── faq.get.ts               # Preguntas frecuentes
+│   │   │   ├── dates.get.ts             # Fechas con disponibilidad
+│   │   │   └── appointments.post.ts     # Crear cita
+│   │   │
+│   │   ├── models/
+│   │   │   ├── conversation.ts           # Historial + validationData + source (web/telegram)
+│   │   │   ├── flow.ts                   # Nodos, edges, configs (incl. botToken)
+│   │   │   ├── vehicle.ts               # Vehiculos con embeddings para vector search
+│   │   │   ├── faq.ts                   # FAQs con embeddings para vector search
+│   │   │   ├── appointment.ts           # Citas reservadas
+│   │   │   └── book.ts                  # Slots disponibles por fecha
+│   │   │
+│   │   ├── services/
+│   │   │   ├── vector-search.service.ts  # Busqueda semantica en vehiculos y FAQs
+│   │   │   └── appointment.service.ts    # Logica de booking (reservar, verificar slots)
+│   │   │
+│   │   ├── memory/
+│   │   │   └── memory.service.ts         # Carga y guarda conversaciones en MongoDB
+│   │   │
+│   │   ├── sse/
+│   │   │   └── emitter.ts               # Helper para emitir eventos SSE
+│   │   │
+│   │   └── db/
+│   │       └── connect.ts               # Conexion a MongoDB Atlas
+│   │
+│   └── shared/
+│       └── types.ts                      # Interfaces TypeScript compartidas
 │
-├── .env                                       # API keys (no commitear)
-├── .env.example                               # Template de variables
-├── vite.config.ts
-├── tailwind.config.js
-├── tsconfig.json
+├── scripts/
+│   └── seed.ts                           # Seed de datos (vehiculos, FAQs, slots)
+│
+├── .env.example                          # Template de variables de entorno
+├── vite.config.ts                        # Configuracion Vite + Analog.js
 ├── package.json
-├── README.md
-├── TASKS.md
-└── ARCHITECTURE.md
+└── ARCHITECTURE.md                       # Documentacion detallada de arquitectura
 ```
 
 ---
 
-## ⚙️ Configuración Local
+## Configuracion Local
 
 ### Prerrequisitos
 
-- Node.js >= 18.x
+- Node.js >= 20.19.1
 - npm >= 9.x
 - Cuenta en MongoDB Atlas (free tier)
-- API key del modelo de IA asignado
+- API key de Google Gemini
 
-### Instalación
+### Instalacion
 
 ```bash
 # 1. Clonar el repositorio
-git clone [URL_DEL_REPO]
-cd ai-agent-builder
+git clone https://github.com/humbertovenavente/atom.git
+cd atom
 
 # 2. Instalar dependencias
 npm install
 
 # 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales:
-#   MONGODB_URI=mongodb+srv://...
-#   LLM_API_KEY=sk-...
-#   LLM_MODEL=gpt-4o / claude-sonnet-4-20250514
+# Editar .env con tus credenciales
 
-# 4. Iniciar servidor de desarrollo
+# 4. Seed de datos (vehiculos, FAQs, horarios)
+npm run seed
+
+# 5. Iniciar servidor de desarrollo
 npm run dev
 
-# 5. Abrir en el navegador
+# 6. Abrir en el navegador
 # http://localhost:5173
 ```
 
 ### Variables de Entorno
 
 ```env
-# Base de datos
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/agent-builder
+# Base de datos MongoDB Atlas
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB_NAME=atom_knowledge
+MONGODB_SESSIONS_DB_NAME=atom_sessions
 
-# Modelo de IA
-LLM_API_KEY=your-api-key-here
-LLM_MODEL=gpt-4o
-LLM_BASE_URL=https://api.openai.com/v1
+# LLM — Google Gemini
+LLM_API_KEY=your-gemini-api-key
+LLM_MODEL=gemini-2.5-flash
+LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta
 
-# Configuración
+# General
 NODE_ENV=development
 ```
+
+### Configurar Telegram Bot
+
+1. Crear un bot con [@BotFather](https://t.me/BotFather) en Telegram
+2. Copiar el bot token
+3. En el editor visual, arrastrar el nodo **Telegram** al canvas
+4. Hacer clic en el nodo para abrir el panel de configuracion
+5. Pegar el bot token
+6. Hacer clic en **Register Webhook** — esto registra `https://{tu-dominio}/api/telegram` como webhook
+7. Enviar un mensaje al bot para probar
 
 ### Deploy a Vercel
 
 ```bash
-# Instalar Vercel CLI
-npm i -g vercel
+# Build
+npm run build
 
-# Deploy
-vercel
+# Deploy (requiere Vercel CLI autenticado)
+npx vercel --prod
 
-# Configurar variables de entorno en Vercel Dashboard
-# Settings → Environment Variables → agregar MONGODB_URI y LLM_API_KEY
+# Configurar variables de entorno en Vercel Dashboard:
+# Settings → Environment Variables → agregar todas las variables del .env
 ```
 
----
-
-## 🧠 Decisiones Técnicas
-
-### 1. ¿Por qué Analog.js en lugar de Angular CLI + NestJS separado?
-
-**Problema**: Con un backend y frontend separados, tendríamos dos repos, dos deploys, CORS, y más complejidad en 24 horas.
-
-**Solución**: Analog.js unifica todo en un proyecto. Las API routes viven en `src/server/routes/` y se despliegan junto al frontend. Un solo `git push` hace deploy de todo.
-
-**Trade-off**: Analog.js es relativamente nuevo y tiene menos documentación que NestJS. Aceptamos esa curva a cambio de velocidad de desarrollo.
-
-### 2. ¿Por qué @xyflow/angular para el editor visual?
-
-**Problema**: Necesitábamos un editor de nodos draggable y conectable con soporte Angular.
-
-**Solución**: @xyflow/angular (antes ngx-flowchart) es el port oficial de React Flow para Angular. Tiene nodos custom, edges animados, mini-mapa, y zoom.
-
-**Alternativa descartada**: ngx-graph — más orientado a visualización estática, no a editores interactivos.
-
-### 3. ¿Por qué MongoDB en lugar de Firestore?
-
-**Problema**: Necesitamos almacenar conversaciones con estructura flexible y consultas sobre historial.
-
-**Solución**: MongoDB Atlas da flexibilidad de esquema, aggregation pipelines para buscar en historiales, y el driver de Node.js funciona directo en las API routes de Nitro.
-
-**Trade-off**: Firestore hubiera sido más rápido de configurar con Firebase Auth, pero MongoDB nos da más control y es más familiar.
-
-### 4. ¿Por qué LangChain.js para la orquestación?
-
-**Problema**: Orquestar múltiples agentes con memoria, tools, y prompts encadenados.
-
-**Solución**: LangChain.js provee abstracciones para chains, agents, memory, y tool calling que aceleran el desarrollo.
-
-**Alternativa viable**: Vercel AI SDK — más simple pero menos flexible para multi-agente.
-
-### 5. Streaming con SSE en lugar de WebSocket
-
-**Problema**: Mostrar respuestas en tiempo real del LLM.
-
-**Solución**: Server-Sent Events (SSE) desde las API routes de Nitro. Es unidireccional (server → client), más simple que WebSocket, y suficiente para streaming de texto.
-
-**Trade-off**: WebSocket permitiría comunicación bidireccional, pero SSE es más simple y compatible con Vercel serverless.
-
-### 6. Memoria: In-memory → MongoDB (persistente)
-
-**Base**: Conversaciones se mantienen en memoria durante la sesión.
-**Bonus implementado**: Persistencia en MongoDB — las conversaciones sobreviven entre sesiones usando el session_id como clave.
+Analog.js tiene deploy zero-config a Vercel. Las API routes en `src/server/routes/api/` se convierten automaticamente en funciones serverless.
 
 ---
 
-## 📊 Criterios de Evaluación — Cómo los cubrimos
+## Decisiones Tecnicas
 
-| Criterio | Pts | Nuestra implementación |
-|----------|-----|----------------------|
-| **Arquitectura** | 35 | Analog.js fullstack, separación clara agentes/tools/memoria, código tipado |
-| **UX + Editor** | 25 | @xyflow con nodos custom, config panel, highlight activo, chat integrado |
-| **Funcionalidad** | 25 | 3 casos de uso completos (FAQs + Catálogo + Agenda) |
-| **Trabajo en equipo** | 15 | División clara frontend/backend, documentación completa |
-| **Bonus: Memoria persistente** | +5 | MongoDB Atlas |
-| **Total estimado** | **~92+** | |
+### Analog.js en lugar de Angular CLI + backend separado
+
+Un solo proyecto = frontend + backend. Las API routes viven en `src/server/routes/` y se despliegan junto al frontend. Un solo `git push` hace deploy de todo. Trade-off: Analog.js es relativamente nuevo, pero la velocidad de desarrollo compensa.
+
+### @foblex/flow en lugar de @xyflow/angular
+
+Libreria madura de editor de nodos con soporte nativo Angular. Drag & drop, conexiones, y nodos custom para visualizar el pipeline de agentes.
+
+### Google Gemini directo en lugar de LangChain
+
+Usamos `@google/genai` SDK directamente en lugar de LangChain.js. La orquestacion multi-agente se implementa en codigo TypeScript puro con prompts especializados por etapa. Esto da control total sobre el pipeline sin abstracciones intermediarias.
+
+### Vector Search en MongoDB Atlas
+
+Los vehiculos y FAQs tienen embeddings almacenados en MongoDB. El `vector-search.service.ts` busca documentos semanticamente relevantes al mensaje del usuario para inyectarlos como contexto al especialista.
+
+### SSE en lugar de WebSocket
+
+Server-Sent Events para streaming del chat web. Es unidireccional (server → client), mas simple que WebSocket, y compatible con Vercel serverless. Telegram usa respuesta completa (no streaming) porque la Bot API requiere un mensaje terminado.
+
+### Memoria persistente en MongoDB
+
+Las conversaciones sobreviven entre sesiones. Cada sesion tiene su propio `sessionId` como clave. Los datos de validacion (nombre, fecha, presupuesto, etc.) se acumulan a lo largo de la conversacion y se persisten entre turnos.
+
+### Dos bases de datos separadas
+
+- `atom_knowledge`: vehiculos, FAQs, slots de citas — datos del negocio
+- `atom_sessions`: conversaciones, flujos — datos de sesion del usuario
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Proyecto desarrollado para el Dev Day Atom 2026.
