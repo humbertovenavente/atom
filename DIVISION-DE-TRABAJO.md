@@ -10,8 +10,8 @@
 
 | Miembro | Rol |
 |---------|-----|
-| **Adrian** | Backend + Agentes IA + Datos + Integracion |
-| **Humberto** | Frontend + Editor Visual + UX |
+| **Adriana Sanchez** | Backend + Agentes IA + Datos + Integracion |
+| **Jose Humberto Benavente** | Frontend + Editor Visual + UX |
 
 ---
 
@@ -24,10 +24,12 @@
 | Fase 3 | Datos y Backend (MongoDB + APIs) | Completada |
 | Fase 4 | Chat y Streaming SSE | Completada |
 | Fase 5 | Nodo de Telegram (agregada) | Completada |
+| Fase 6 | Fix de persistencia de citas | Completada |
+| Fase 7 | Mejoras de UI: temas, modo claro, i18n | Completada |
 
 ---
 
-## Responsabilidades de Adrian — Backend + Agentes IA + Datos
+## Responsabilidades de Adriana Sanchez — Backend + Agentes IA + Datos
 
 ### Fase 1: Fundacion y Setup (Backend)
 - Scaffold del proyecto con Analog.js 2.3 + Angular 21
@@ -94,9 +96,7 @@
 
 ---
 
-## Responsabilidades de Humberto — Frontend + Editor Visual + UX
-
-> **Nota:** La parte de frontend todavia necesita completarse/integrarse en algunas areas.
+## Responsabilidades de Jose Humberto Benavente — Frontend + Editor Visual + UX
 
 ### Fase 1: Fundacion y Setup (Frontend)
 - Integracion de @foblex/flow 18.1.2 como libreria de editor visual
@@ -141,6 +141,22 @@
 - Panel de configuracion condicional con campo de bot token
 - Boton de registro de webhook desde la interfaz
 - Contribucion via Pull Request (`feature/telegram-node`)
+
+### Fase 6: Fix de Persistencia de Citas
+- Correccion del flujo de booking en `chat.post.ts` para que las citas se persistan en la coleccion `books`
+- Inyeccion de datos reales de disponibilidad en el prompt del especialista (evitar que el LLM invente horarios falsos)
+- Contratos de tipos actualizados, export de `getAvailableSlots`
+- Guard de booking basado en campos recopilados + inyeccion proactiva de slots
+- Nodo de booking agregado al pipeline del flujo
+
+### Fase 7: Mejoras de UI — Temas, Modo Claro, i18n
+- Infraestructura de theming con CSS variables + ThemeService
+- Tema oscuro mejorado: fondos mas claros (#1a2332, #243044) con bordes visibles en vez de negro puro
+- Modo claro completo: fondos blancos/gris claro, texto oscuro, contraste adecuado
+- Boton toggle de tema en toolbar que alterna entre modo oscuro y claro, persiste en localStorage
+- I18nService con diccionarios completos EN/ES
+- Traducciones aplicadas a todos los templates de componentes (sidebar, canvas, chat, toolbar, config panel, nodos)
+- Toggle de idioma en toolbar que alterna entre ingles y español, persiste en localStorage
 
 ---
 
@@ -188,9 +204,9 @@
 - **Lineas de codigo:** 2,394 LOC TypeScript
 - **Archivos:** 72
 - **Commits:** 79
-- **Fases completadas:** 5/5 (100%)
-- **Planes ejecutados:** 14
-- **Requisitos cumplidos:** 26/26
+- **Fases completadas:** 7/7 (100%)
+- **Planes ejecutados:** 20
+- **Requisitos cumplidos:** 38/38
 - **Tiempo de desarrollo:** ~18 horas efectivas en 2 dias
 
 ---
@@ -199,11 +215,11 @@
 
 | Decision | Razon | Responsable |
 |----------|-------|-------------|
-| Analog.js en vez de Angular CLI + backend separado | Un solo proyecto, deploy unificado, menos complejidad | Adrian |
-| @foblex/flow en vez de @xyflow/angular | Port nativo Angular, compatible con Angular 21 | Humberto |
-| SSE en vez de WebSocket | Mas simple, compatible con Vercel serverless | Adrian |
-| MongoDB Atlas para todo | Vector Search + sesiones + flujos en un solo cluster | Adrian |
-| Raw fetch() para SSE (no HttpClient) | HttpClient no expone ReadableStream body | Humberto |
-| Angular Signals para FlowService | Estado reactivo sin complejidad de RxJS | Humberto |
-| Gemini embeddings (768 dims) | Menor costo, suficiente para hackathon | Adrian |
-| SSR deshabilitado | Evitar errores de `window` con @foblex/flow | Adrian |
+| Analog.js en vez de Angular CLI + backend separado | Un solo proyecto, deploy unificado, menos complejidad | Adriana Sanchez |
+| @foblex/flow en vez de @xyflow/angular | Port nativo Angular, compatible con Angular 21 | Jose Humberto Benavente |
+| SSE en vez de WebSocket | Mas simple, compatible con Vercel serverless | Adriana Sanchez |
+| MongoDB Atlas para todo | Vector Search + sesiones + flujos en un solo cluster | Adriana Sanchez |
+| Raw fetch() para SSE (no HttpClient) | HttpClient no expone ReadableStream body | Jose Humberto Benavente |
+| Angular Signals para FlowService | Estado reactivo sin complejidad de RxJS | Jose Humberto Benavente |
+| Gemini embeddings (768 dims) | Menor costo, suficiente para hackathon | Adriana Sanchez |
+| SSR deshabilitado | Evitar errores de `window` con @foblex/flow | Adriana Sanchez |
