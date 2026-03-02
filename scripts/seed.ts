@@ -1,5 +1,5 @@
 /**
- * Seed script: Populates MongoDB Atlas with vehicles, FAQs, and date slots.
+ * Seed script: Populates MongoDB Atlas with vehicles, FAQs, and appointments.
  * Generates Gemini embeddings for vehicles and FAQs.
  * Creates Atlas Vector Search indexes and polls until READY.
  *
@@ -14,7 +14,7 @@ import { GoogleGenAI } from '@google/genai';
 import { connectDB } from '../src/server/db/connect.js';
 import { Vehicle } from '../src/server/models/vehicle.js';
 import { FAQ } from '../src/server/models/faq.js';
-import { DateSlot } from '../src/server/models/date-slot.js';
+import { Appointment } from '../src/server/models/appointment.js';
 
 // ---------------------------------------------------------------------------
 // Environment setup
@@ -115,8 +115,8 @@ interface RawFAQCategory {
   preguntas: RawFAQPregunta[];
 }
 
-interface RawDateSlot {
-  fecha: string;
+interface RawAppointment {
+  date: string;
   slots: string[];
 }
 
@@ -174,9 +174,9 @@ function loadFAQs(): { texts: string[]; docs: Record<string, unknown>[] } {
   return { texts, docs };
 }
 
-function loadDateSlots(): RawDateSlot[] {
-  const filePath = resolve(process.cwd(), 'jsons/dates.json');
-  return JSON.parse(readFileSync(filePath, 'utf-8')) as RawDateSlot[];
+function loadAppointments(): RawAppointment[] {
+  const filePath = resolve(process.cwd(), 'dates.json');
+  return JSON.parse(readFileSync(filePath, 'utf-8')) as RawAppointment[];
 }
 
 // ---------------------------------------------------------------------------
@@ -266,8 +266,8 @@ async function main(): Promise<void> {
   console.log('Loading source JSON files...');
   const { raw: rawVehicles, docs: vehicleDocs } = loadVehicles();
   const { texts: faqTexts, docs: faqDocs } = loadFAQs();
-  const dateDocs = loadDateSlots();
-  console.log(`  Loaded: ${rawVehicles.length} vehicles, ${faqDocs.length} FAQs, ${dateDocs.length} date slots\n`);
+  const appointmentDocs = loadAppointments();
+  console.log(`  Loaded: ${rawVehicles.length} vehicles, ${faqDocs.length} FAQs, ${appointmentDocs.length} appointments\n`);
 
   // 3. Generate embeddings (parallel)
   console.log('Generating embeddings for vehicles...');
@@ -293,14 +293,14 @@ async function main(): Promise<void> {
   console.log('Clearing existing data...');
   await Vehicle.deleteMany({});
   await FAQ.deleteMany({});
-  await DateSlot.deleteMany({});
+  await Appointment.deleteMany({});
   console.log('  Collections cleared.\n');
 
   console.log('Inserting data...');
   await Vehicle.insertMany(vehicleDocsWithEmbeddings);
   await FAQ.insertMany(faqDocsWithEmbeddings);
-  await DateSlot.insertMany(dateDocs);
-  console.log(`Seeded: ${rawVehicles.length} vehicles, ${faqDocs.length} FAQs, ${dateDocs.length} date slots\n`);
+  await Appointment.insertMany(appointmentDocs);
+  console.log(`Seeded: ${rawVehicles.length} vehicles, ${faqDocs.length} FAQs, ${appointmentDocs.length} appointments\n`);
 
   // 6. Atlas Vector Search indexes
   const vehicleColl = Vehicle.collection.name;

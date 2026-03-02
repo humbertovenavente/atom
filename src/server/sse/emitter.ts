@@ -4,6 +4,8 @@ export type SSEEventType =
   | 'agent_active'
   | 'message_chunk'
   | 'validation_update'
+  | 'booking_confirmed'
+  | 'booking_failed'
   | 'done'
   | 'error';
 

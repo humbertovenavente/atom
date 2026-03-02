@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T20:51:44Z"
+last_updated: "2026-03-01T23:53:46.058Z"
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 7
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 5
   completed_plans: 6
 ---
 
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 5 of 5 (Add Telegram Node to Visual Flow Editor)
-Plan: 4 of 4 in current phase (05-04 complete)
-Status: Complete
-Last activity: 2026-03-01 — Phase 5 complete (Telegram node fully integrated, end-to-end verified via Beeceptor)
+Phase: 7 of 7 (UI Improvements — Light Mode, Theme Toggle, Lighter Dark Theme, i18n)
+Plan: 2 of 3 in current phase (07-02 complete — i18n translations applied)
+Status: In Progress
+Last activity: 2026-03-01 — Merge of uibugs into main (Telegram + booking fixes + theme + i18n)
 
 Progress: [██████████] 100%
 
@@ -47,6 +47,7 @@ Progress: [██████████] 100%
 - Trend: decreasing (simple tasks)
 
 *Updated after each plan completion*
+| Phase 06-fix-appointment-booking-persistence-bug P01 | 5min | 2 tasks | 4 files |
 | Phase 02-flow-editor P01 | 5min | 2 tasks | 10 files |
 | Phase 02-flow-editor P02 | 2 | 2 tasks | 6 files |
 | Phase 02-flow-editor P03 | 15min | 2 tasks | 6 files |
@@ -59,6 +60,9 @@ Progress: [██████████] 100%
 | Phase 04-chat-sse-integration P02 | 5min | 2 tasks | 0 files |
 | Phase 05-telegram P02 | 5min | 2 tasks | 3 files |
 | Phase 05-telegram P03 | 1min | 1 task | 1 file |
+| Phase 06-fix-appointment-booking-persistence-bug P02 | 15min | 2 tasks | 1 files |
+| Phase 07-ui-improvements P01 | 8min | 2 tasks | 8 files |
+| Phase 07-ui-improvements P02 | 6min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -120,10 +124,19 @@ Recent decisions affecting current work:
 - [05-03]: parse_mode NOT set in sendMessage — plain text only (Markdown can cause delivery failures)
 - [05-03]: generateContent() used (not generateContentStream()) — Telegram requires a complete reply before sendMessage
 - [05-03]: Bot token read from MongoDB flow at request time — supports runtime reconfiguration without restart
+- [06-01]: getAvailableSlots exported as named export — requires own connectDB() call since it may be called outside bookAppointment context
+- [06-01]: Booking flow node uses type 'tool' (matching tool-search pattern) — no new FlowNode type required
+- [Phase 06-02]: Fields-first booking guard: check data presence (fullName+preferredDate+preferredTime) not intent label — eliminates silent booking failures when LLM reclassifies final message
+- [Phase 06-02]: effectiveIntent overrides raw classified intent when all booking fields present — specialist prompt, re-validation, and memory all use the corrected scheduling intent
+- [Phase 06-02]: Proactive getAvailableSlots() fetched before LLM call and injected into buildSpecialistPrompt via new availableSlots param — prevents specialist LLM from inventing fake availability
+- [Phase 07-01]: CSS custom properties via [data-theme] attribute on documentElement; ThemeService uses Angular signal + effect(); inline style bindings chosen over Tailwind custom tokens (no config file)
+- [Phase 07-ui-improvements]: No external i18n library — custom I18nService with flat key dictionary; default locale es; language toggle shows opposite locale label
 
 ### Roadmap Evolution
 
 - Phase 5 added: Add Telegram node to visual flow editor
+- Phase 6 added: Fix appointment booking persistence bug
+- Phase 7 added: UI improvements - light mode, theme toggle, lighter dark theme, i18n English/Spanish
 
 ### Pending Todos
 
@@ -137,5 +150,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 05 complete — all 4 plans done, Telegram node fully integrated and verified
-Resume file: N/A — all phases complete
+Stopped at: Merged uibugs into main — Phases 5 (Telegram), 6 (booking), 7 (theme/i18n) all integrated
+Resume file: None

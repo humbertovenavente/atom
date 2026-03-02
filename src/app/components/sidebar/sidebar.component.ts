@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FlowService } from '../../services/flow.service';
 import { NodeConfigPanelComponent } from '../node-config-panel/node-config-panel.component';
+import { I18nService } from '../../services/i18n.service';
 
 interface NodeTypeConfig {
   type: 'memory' | 'orchestrator' | 'validator' | 'specialist' | 'generic' | 'tool' | 'telegram';
@@ -11,13 +12,13 @@ interface NodeTypeConfig {
 }
 
 const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
-  { type: 'memory', label: 'Memoria', icon: 'brain', color: '#8B5CF6', description: 'Almacena contexto de conversación' },
-  { type: 'orchestrator', label: 'Orquestador', icon: 'target', color: '#3B82F6', description: 'Dirige el flujo de agentes' },
-  { type: 'validator', label: 'Validador', icon: 'check-circle', color: '#10B981', description: 'Valida datos recolectados' },
-  { type: 'specialist', label: 'Especialista', icon: 'zap', color: '#F59E0B', description: 'Experto en dominio específico' },
-  { type: 'generic', label: 'Genérico', icon: 'message-circle', color: '#6B7280', description: 'Respuestas generales' },
-  { type: 'tool', label: 'Herramienta', icon: 'tool', color: '#EF4444', description: 'Herramienta externa' },
-  { type: 'telegram', label: 'Telegram', icon: 'send', color: '#0088CC', description: 'Canal de entrada desde Telegram' },
+  { type: 'memory', label: 'Memory', icon: 'brain', color: '#8B5CF6', description: 'Stores conversation context' },
+  { type: 'orchestrator', label: 'Orchestrator', icon: 'target', color: '#3B82F6', description: 'Routes agent flow' },
+  { type: 'validator', label: 'Validator', icon: 'check-circle', color: '#10B981', description: 'Validates collected data' },
+  { type: 'specialist', label: 'Specialist', icon: 'zap', color: '#F59E0B', description: 'Domain-specific expert' },
+  { type: 'generic', label: 'Generic', icon: 'message-circle', color: '#6B7280', description: 'General responses' },
+  { type: 'tool', label: 'Tool', icon: 'tool', color: '#EF4444', description: 'External tool integration' },
+  { type: 'telegram', label: 'Telegram', icon: 'send', color: '#0088CC', description: 'Telegram input channel' },
 ];
 
 const EMOJI_MAP: Record<string, string> = {
@@ -34,27 +35,28 @@ const EMOJI_MAP: Record<string, string> = {
   selector: 'app-sidebar',
   standalone: true,
   imports: [NodeConfigPanelComponent],
-  host: { class: 'block h-full overflow-y-auto' },
+  host: { class: 'block h-full overflow-hidden' },
   template: `
     @if (flowService.selectedNodeId()) {
       <app-node-config-panel [nodeId]="flowService.selectedNodeId()!" />
     } @else {
-      <div class="h-full bg-gray-900 text-white border-r border-gray-700 flex flex-col">
-        <div class="px-4 py-3 border-b border-gray-700">
-          <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Nodos</h2>
+      <div class="h-full flex flex-col border-r"
+        style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
+        <div class="px-4 py-3 border-b" style="border-color: var(--border-primary);">
+          <h2 class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-secondary);">{{ i18n.t('sidebar.nodes') }}</h2>
         </div>
-        <div class="flex-1 overflow-y-auto p-3 space-y-2">
+        <div class="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           @for (config of nodeTypes; track config.type) {
             <div
               draggable="true"
               (dragstart)="onDragStart($event, config.type)"
-              class="rounded-lg p-3 cursor-grab hover:bg-gray-800 transition-colors select-none"
-              [style.borderLeft]="'3px solid ' + config.color">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-lg">{{ getEmoji(config.icon) }}</span>
-                <span class="text-sm font-medium text-white">{{ config.label }}</span>
+              class="theme-hover rounded-lg p-2.5 cursor-grab transition-all duration-150 select-none border border-transparent"
+              [style.borderLeft]="'3px solid ' + config.color + ' !important'">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-base">{{ getEmoji(config.icon) }}</span>
+                <span class="text-sm font-medium" style="color: var(--text-primary);">{{ getLabel(config) }}</span>
               </div>
-              <p class="text-xs text-gray-400 leading-tight">{{ config.description }}</p>
+              <p class="text-xs leading-snug pl-7" style="color: var(--text-tertiary);">{{ getDescription(config) }}</p>
             </div>
           }
         </div>
@@ -64,10 +66,21 @@ const EMOJI_MAP: Record<string, string> = {
 })
 export class SidebarComponent {
   readonly flowService = inject(FlowService);
+  readonly i18n = inject(I18nService);
   readonly nodeTypes = NODE_TYPE_CONFIGS;
 
   getEmoji(iconName: string): string {
     return EMOJI_MAP[iconName] ?? '📦';
+  }
+
+  getLabel(config: NodeTypeConfig): string {
+    const key = `sidebar.${config.type}`;
+    return this.i18n.t(key);
+  }
+
+  getDescription(config: NodeTypeConfig): string {
+    const key = `sidebar.${config.type}.desc`;
+    return this.i18n.t(key);
   }
 
   onDragStart(event: DragEvent, nodeType: string): void {

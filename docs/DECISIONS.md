@@ -16,12 +16,12 @@ The remote codebase (post-pull) uses **Spanish field names** in Mongoose models 
 
 **FAQ model fields (English):** `category`, `question`, `answer`, `originalId`, `embedding`
 
-**DateSlot model:** verify field names match Atlas before changing anything.
+**Appointment model fields (English):** `date`, `slots` — maps to Atlas `appointments` collection. (`dateslots` collection is deprecated, do NOT use.)
 
 ### Database Structure (corrected from Phase 2)
 
 Remote code uses **single-database** (not two-DB). All collections live in `atom_knowledge`:
-- `vehicles`, `faq`, `dateslots` — knowledge base
+- `vehicles`, `faq`, `appointments` — knowledge base
 - `conversations` — sessions/chat history (uses `Conversation` model — name kept as-is)
 
 ### Env Var Standardization
@@ -41,7 +41,7 @@ Remote code uses **single-database** (not two-DB). All collections live in `atom
 - Returns **top 3 results** (default changed from 5 → 3)
 - **No score threshold** — return top N always
 - **Fallback:** if `$vectorSearch` returns empty → run regular `.find()` with simple filter
-- **No `searchDates()`** — date slots use date filter only (`GET /api/dates`)
+- **No `searchDates()`** — appointments use date filter only (`GET /api/dates`)
 
 ### chat.post.ts Rewiring (PENDING — not completed in Phase 3)
 

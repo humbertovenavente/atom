@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FlowService } from '../../services/flow.service';
+import { I18nService } from '../../services/i18n.service';
 import type { FlowNode } from '@models/types';
 
 const EMOJI_MAP: Record<string, string> = {
@@ -15,16 +16,16 @@ const EMOJI_MAP: Record<string, string> = {
 
 const DEFAULT_PROMPTS: Record<string, string> = {
   orchestrator:
-    'Eres un orquestador de intención. Analiza el mensaje del usuario y determina cuál agente especializado debe responder.',
+    'You are an intent orchestrator. Analyze the user message and determine which specialized agent should respond.',
   memory:
-    'Eres un agente de memoria. Recupera y almacena el contexto relevante de la conversación.',
+    'You are a memory agent. Retrieve and store relevant conversation context.',
   validator:
-    'Eres un validador. Verifica que los datos recopilados sean completos y correctos antes de continuar.',
+    'You are a validator. Verify that collected data is complete and correct before proceeding.',
   specialist:
-    'Eres un especialista en tu dominio. Proporciona respuestas precisas y detalladas sobre tu área de expertise.',
+    'You are a domain specialist. Provide precise and detailed answers about your area of expertise.',
   generic:
-    'Eres un asistente general. Responde de forma útil y amigable cuando ningún especialista aplique.',
-  tool: 'Eres una herramienta de búsqueda. Consulta fuentes externas y devuelve datos estructurados.',
+    'You are a general assistant. Respond helpfully and friendly when no specialist applies.',
+  tool: 'You are a search tool. Query external sources and return structured data.',
   telegram: '',
 };
 
@@ -33,9 +34,9 @@ const DEFAULT_PROMPTS: Record<string, string> = {
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="h-full bg-gray-900 text-white border-r border-gray-700 flex flex-col">
+    <div class="h-full flex flex-col border-r" style="background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-primary);">
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+      <div class="px-4 py-3 border-b flex items-center justify-between" style="border-color: var(--border-primary);">
         <div class="flex items-center gap-2 min-w-0">
           <span class="text-lg flex-shrink-0">{{ emoji() }}</span>
           <span class="text-sm font-medium truncate">{{ nodeLabel() }}</span>
@@ -48,8 +49,9 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         </div>
         <button
           (click)="close()"
-          class="text-gray-400 hover:text-white text-xl leading-none flex-shrink-0 ml-2"
-          title="Cerrar configuración">
+          class="text-xl leading-none flex-shrink-0 ml-2 transition-colors"
+          style="color: var(--text-secondary);"
+          title="Close configuration">
           &times;
         </button>
       </div>
@@ -59,63 +61,67 @@ const DEFAULT_PROMPTS: Record<string, string> = {
         @if (nodeType() === 'telegram') {
           <!-- Telegram-specific configuration -->
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+            <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
               Bot Token
             </label>
             <input
               type="password"
               [value]="currentBotToken()"
               (input)="onBotTokenChange($event)"
-              class="w-full bg-gray-800 text-white text-sm rounded-lg p-3 border border-gray-600 outline-none focus:border-blue-500"
+              class="w-full text-sm rounded-lg p-3 outline-none focus:border-blue-500"
+              style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
               placeholder="123456789:ABCdef..." />
-            <p class="text-xs text-gray-500 mt-1">Obtén tu token en @BotFather en Telegram.</p>
+            <p class="text-xs mt-1" style="color: var(--text-tertiary);">Get your token from @BotFather on Telegram.</p>
           </div>
 
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
+            <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
               Webhook URL (auto)
             </label>
             <input
               type="text"
               [value]="webhookUrl()"
               readonly
-              class="w-full bg-gray-700 text-gray-300 text-xs rounded-lg p-3 border border-gray-600 cursor-default" />
+              class="w-full text-xs rounded-lg p-3 cursor-default"
+              style="background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-primary);" />
           </div>
 
           <button
             (click)="registerWebhook()"
             [disabled]="registerStatus() === 'loading' || !currentBotToken()"
             class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm py-2 px-4 rounded-lg transition-colors">
-            @if (registerStatus() === 'loading') { Registrando... }
-            @else if (registerStatus() === 'success') { Webhook registrado }
-            @else if (registerStatus() === 'error') { Error — intentar de nuevo }
-            @else { Registrar Webhook }
+            @if (registerStatus() === 'loading') { Registering... }
+            @else if (registerStatus() === 'success') { Webhook registered }
+            @else if (registerStatus() === 'error') { Error — try again }
+            @else { Register Webhook }
           </button>
 
           @if (registerStatus() === 'success') {
-            <p class="text-xs text-green-400">El webhook fue registrado. Telegram enviará mensajes a esta URL.</p>
+            <p class="text-xs text-green-400">Webhook registered. Telegram will send messages to this URL.</p>
           }
           @if (registerStatus() === 'error') {
-            <p class="text-xs text-red-400">Error al registrar. Verifica que el bot token sea correcto y que la URL sea HTTPS.</p>
+            <p class="text-xs text-red-400">Registration failed. Verify the bot token is correct and the URL is HTTPS.</p>
           }
         } @else {
-          <!-- Standard node configuration (systemPrompt + temperature) -->
+          <!-- System Prompt -->
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
-              System Prompt
+            <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
+              {{ i18n.t('config.systemPrompt') }}
             </label>
             <textarea
               [value]="currentPrompt()"
               (input)="onPromptChange($event)"
               rows="8"
-              class="w-full bg-gray-800 text-white text-sm rounded-lg p-3 border border-gray-600 outline-none focus:border-blue-500 resize-none leading-relaxed"
-              placeholder="Instrucciones del sistema para este agente...">
+              class="w-full text-sm rounded-lg p-3 outline-none focus:border-blue-500 resize-none leading-relaxed"
+              style="background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-primary);"
+              [placeholder]="i18n.t('config.promptPlaceholder')">
             </textarea>
           </div>
 
+          <!-- Temperature -->
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wider block mb-1">
-              Temperature: {{ currentTemp() }}
+            <label class="text-xs uppercase tracking-wider block mb-1" style="color: var(--text-secondary);">
+              {{ i18n.t('config.temperature') }}: {{ currentTemp() }}
             </label>
             <input
               type="range"
@@ -125,12 +131,21 @@ const DEFAULT_PROMPTS: Record<string, string> = {
               [value]="currentTemp()"
               (input)="onTempChange($event)"
               class="w-full accent-blue-500" />
-            <div class="flex justify-between text-xs text-gray-500 mt-1">
-              <span>0 (precise)</span>
-              <span>2 (creative)</span>
+            <div class="flex justify-between text-xs mt-1" style="color: var(--text-tertiary);">
+              <span>{{ i18n.t('config.precise') }}</span>
+              <span>{{ i18n.t('config.creative') }}</span>
             </div>
           </div>
         }
+
+        <!-- Delete node -->
+        <div class="pt-2 border-t" style="border-color: var(--border-primary);">
+          <button
+            (click)="deleteNode()"
+            class="w-full text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-2 transition-all duration-150">
+            {{ i18n.t('config.deleteNode') }}
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -138,6 +153,7 @@ const DEFAULT_PROMPTS: Record<string, string> = {
 export class NodeConfigPanelComponent {
   readonly nodeId = input.required<string>();
   private readonly flowService = inject(FlowService);
+  readonly i18n = inject(I18nService);
 
   readonly node = computed<FlowNode | undefined>(() =>
     this.flowService.nodes().find((n) => n.id === this.nodeId())
@@ -165,6 +181,18 @@ export class NodeConfigPanelComponent {
 
   close(): void {
     this.flowService.setSelectedNode(null);
+  }
+
+  onLabelChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.flowService.updateNodeLabel(this.nodeId(), value);
+  }
+
+  deleteNode(): void {
+    if (window.confirm(this.i18n.t('config.deleteConfirm'))) {
+      this.flowService.setSelectedNode(null);
+      this.flowService.removeNode(this.nodeId());
+    }
   }
 
   onPromptChange(event: Event): void {

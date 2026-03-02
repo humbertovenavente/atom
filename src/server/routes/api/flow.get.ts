@@ -9,7 +9,7 @@ const nodes: FlowNode[] = [
     type: 'orchestrator',
     position: { x: 80, y: 300 },
     data: {
-      label: 'Orquestador',
+      label: 'Orchestrator',
       icon: 'target',
       color: '#3B82F6',
     },
@@ -19,7 +19,7 @@ const nodes: FlowNode[] = [
     type: 'memory',
     position: { x: 320, y: 100 },
     data: {
-      label: 'Memoria',
+      label: 'Memory',
       icon: 'brain',
       color: '#8B5CF6',
     },
@@ -29,7 +29,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 260 },
     data: {
-      label: 'Especialista FAQs',
+      label: 'FAQ Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -39,7 +39,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 380 },
     data: {
-      label: 'Especialista Catálogo',
+      label: 'Catalog Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -49,7 +49,7 @@ const nodes: FlowNode[] = [
     type: 'specialist',
     position: { x: 320, y: 500 },
     data: {
-      label: 'Especialista Agenda',
+      label: 'Schedule Specialist',
       icon: 'zap',
       color: '#F59E0B',
     },
@@ -59,9 +59,19 @@ const nodes: FlowNode[] = [
     type: 'tool',
     position: { x: 560, y: 100 },
     data: {
-      label: 'Herramienta Búsqueda',
+      label: 'Search Tool',
       icon: 'tool',
       color: '#EF4444',
+    },
+  },
+  {
+    id: 'booking',
+    type: 'tool',
+    position: { x: 560, y: 500 },
+    data: {
+      label: 'Booking',
+      icon: 'calendar',
+      color: '#10B981',
     },
   },
   {
@@ -69,7 +79,7 @@ const nodes: FlowNode[] = [
     type: 'validator',
     position: { x: 560, y: 320 },
     data: {
-      label: 'Validador',
+      label: 'Validator',
       icon: 'check-circle',
       color: '#10B981',
     },
@@ -79,7 +89,7 @@ const nodes: FlowNode[] = [
     type: 'generic',
     position: { x: 800, y: 300 },
     data: {
-      label: 'Genérico',
+      label: 'Generic',
       icon: 'message-circle',
       color: '#6B7280',
     },
@@ -130,6 +140,12 @@ const edges: FlowEdge[] = [
     animated: false,
   },
   {
+    id: 'edge-schedule-booking',
+    source: 'specialist-schedule',
+    target: 'booking',
+    animated: false,
+  },
+  {
     id: 'edge-validator-generic',
     source: 'validator-1',
     target: 'generic-1',
@@ -146,8 +162,15 @@ export default defineEventHandler(async (event) => {
       await connectDB();
       const saved = await Flow.findOne({ flowId: 'default' }).lean();
       if (saved) {
+        // Normalize: reset temperature from old 0.7 default to 0.3
+        const normalizedNodes = (saved.nodes as any[]).map((n: any) => {
+          if (n.data?.config?.temperature === 0.7) {
+            return { ...n, data: { ...n.data, config: { ...n.data.config, temperature: 0.3 } } };
+          }
+          return n;
+        });
         return {
-          nodes: saved.nodes,
+          nodes: normalizedNodes,
           edges: saved.edges,
           nodeConfigs: saved.nodeConfigs ?? {},
         };

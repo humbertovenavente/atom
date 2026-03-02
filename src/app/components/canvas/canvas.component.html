@@ -1,8 +1,12 @@
-<f-flow fDraggable (fMoveNodes)="onMoveNodes($event)" (drop)="onCanvasDrop($event)" (dragover)="onCanvasDragOver($event)">
+<f-flow fDraggable (fMoveNodes)="onMoveNodes($event)" (fCreateConnection)="onCreateConnection($event)" (fSelectionChange)="onSelectionChange($event)" (drop)="onCanvasDrop($event)" (dragover)="onCanvasDragOver($event)">
   <f-canvas fZoom>
+    <!-- Visual line while dragging a new connection -->
+    <f-connection-for-create fType="segment"></f-connection-for-create>
+
     <!-- Edges (rendered before nodes so they appear behind) -->
     <f-connection
       *ngFor="let edge of flowService.edges()"
+      [fConnectionId]="edge.id"
       [fOutputId]="edge.source + '-out'"
       [fInputId]="edge.target + '-in'"
       fType="segment"
@@ -16,6 +20,8 @@
       fDragHandle
       [fNodeId]="node.id"
       [fNodePosition]="node.position"
+      [fNodeSize]="node.size"
+      (fNodeSizeChange)="onNodeSizeChange(node.id, $event)"
       class="flow-node"
       [class.node--active]="flowService.activeNodeId() === node.id"
       [class.node--completed]="flowService.completedNodeIds().has(node.id) && flowService.activeNodeId() !== node.id"
@@ -45,6 +51,9 @@
         fInputConnectableSide="left"
         class="flow-node__port flow-node__port--in">
       </div>
+
+      <!-- Resize handle (right edge) -->
+      <div fResizeHandle fResizeHandleType="right" class="flow-node__resize-handle"></div>
     </div>
   </f-canvas>
 

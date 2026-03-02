@@ -98,3 +98,32 @@ Plans:
 - [ ] 05-02-PLAN.md — Frontend node UI (sidebar + canvas + conditional config panel with bot token input and webhook registration)
 - [ ] 05-03-PLAN.md — Backend webhook handler (telegram.post.ts — non-streaming agent pipeline + Telegram sendMessage reply)
 - [ ] 05-04-PLAN.md — Dev server startup + human end-to-end verification checkpoint
+
+### Phase 6: Fix appointment booking persistence bug
+
+**Goal:** Fix the booking flow in chat.post.ts so appointments actually persist to the books collection when all scheduling fields are collected, and inject real availability data into the specialist prompt so the LLM never invents fake schedules
+**Requirements**: BOOK-01, BOOK-02, BOOK-03, BOOK-04, BOOK-05
+**Depends on:** Phase 4
+**Plans:** 2/2 plans complete
+
+Plans:
+- [ ] 06-01-PLAN.md — Type contracts, export getAvailableSlots, add booking node to flow pipeline
+- [ ] 06-02-PLAN.md — Fields-first booking guard, proactive slot injection, effectiveIntent in chat.post.ts + human verification
+
+### Phase 7: UI improvements - light mode, theme toggle, lighter dark theme, i18n English/Spanish
+
+**Goal:** Replace pitch-black dark theme with lighter blue-gray tones, add a complete light mode, provide a theme toggle button, and add i18n support for English/Spanish with a language toggle
+**Requirements**: UI-01, UI-02, UI-03, UI-04
+**Depends on:** Phase 6
+**Success Criteria** (what must be TRUE):
+  1. Dark theme uses lighter backgrounds (#1a2332, #243044) and visible borders instead of pitch black (#0F172A, #1F2937)
+  2. Light mode renders with white/light gray backgrounds, dark text, and proper contrast
+  3. Theme toggle button in toolbar switches between dark and light mode, persists in localStorage
+  4. Language toggle in toolbar switches all UI text between English and Spanish, persists in localStorage
+  5. All components (sidebar, canvas, chat, toolbar, config panel, nodes) respect both theme and language
+**Plans:** 2/3 plans executed
+
+Plans:
+- [ ] 07-01-PLAN.md — CSS variable theming infrastructure + ThemeService + apply to all components + toggle button
+- [ ] 07-02-PLAN.md — I18nService with EN/ES dictionaries + apply translations to all component templates + language toggle
+- [ ] 07-03-PLAN.md — Human verification checkpoint for both themes and both languages

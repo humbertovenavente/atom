@@ -22,7 +22,9 @@ export class FlowService {
     this.http.get<FlowResponse>('/api/flow').subscribe({
       next: (response) => {
         this.nodes.set(response.nodes);
-        this.edges.set(response.edges);
+        // Filter out edges with missing source/target to prevent foblex crashes
+        const validEdges = response.edges.filter(e => e.source && e.target);
+        this.edges.set(validEdges);
       },
       error: (err) => {
         console.error('Failed to load default flow:', err);
@@ -65,6 +67,24 @@ export class FlowService {
 
   addEdge(edge: FlowEdge): void {
     this.edges.update((edges) => [...edges, edge]);
+  }
+
+  removeEdge(edgeId: string): void {
+    this.edges.update((edges) => edges.filter((e) => e.id !== edgeId));
+  }
+
+  updateNodeSize(id: string, size: { width: number; height: number }): void {
+    this.nodes.update((nodes) =>
+      nodes.map((node) => (node.id === id ? { ...node, size } : node))
+    );
+  }
+
+  updateNodeLabel(nodeId: string, label: string): void {
+    this.nodes.update((nodes) =>
+      nodes.map((n) =>
+        n.id === nodeId ? { ...n, data: { ...n.data, label } } : n
+      )
+    );
   }
 
   updateNodeConfig(nodeId: string, patch: Partial<NodeConfig>): void {

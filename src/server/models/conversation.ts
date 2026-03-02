@@ -10,6 +10,7 @@ const messageSchema = new mongoose.Schema({
 const conversationSchema = new mongoose.Schema(
   {
     sessionId: { type: String, unique: true, index: true, required: true },
+    title: { type: String, default: null },
     messages: [messageSchema],
     validationData: { type: mongoose.Schema.Types.Mixed, default: {} },
     currentIntent: { type: String, default: null },
