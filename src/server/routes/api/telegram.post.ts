@@ -27,6 +27,11 @@ function getGenAI(): GoogleGenAI {
 }
 const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.5-flash';
 
+function getNodeConfig(flow: any, nodeType: string): { systemPrompt?: string; temperature?: number } {
+  const node = flow?.nodes?.find((n: any) => n.type === nodeType);
+  return node?.data?.config ?? {};
+}
+
 // Orchestrator system prompt — built dynamically to inject current date
 function buildOrchestratorPrompt(): string {
   const now = new Date();
@@ -52,12 +57,17 @@ Omite campos extracted que no estén presentes en el mensaje. Usa null para camp
 }
 
 async function classifyIntent(
-  message: string
+  message: string,
+  orchestratorConfig: { systemPrompt?: string; temperature?: number } = {}
 ): Promise<{ intent: OrchestratorResult['intent']; extracted: Record<string, unknown> }> {
+  let prompt = buildOrchestratorPrompt();
+  if (orchestratorConfig.systemPrompt) {
+    prompt += '\n\nINSTRUCCIONES ADICIONALES:\n' + orchestratorConfig.systemPrompt;
+  }
   const response = await getGenAI().models.generateContent({
     model: MODEL(),
     contents: [{ role: 'user', parts: [{ text: message }] }],
-    config: { systemInstruction: buildOrchestratorPrompt() },
+    config: { systemInstruction: prompt, temperature: orchestratorConfig.temperature ?? 0.3 },
   });
   try {
     const text = response.text ?? '';
@@ -269,13 +279,16 @@ export default defineEventHandler(async (event) => {
       return { ok: true };
     }
 
+    const orchestratorConfig = getNodeConfig(flow, 'orchestrator');
+    const specialistConfig = getNodeConfig(flow, 'specialist');
+
     const sessionId = `telegram-${chatId}`;
 
     // Step 1: Memory — load conversation history
     const memory = await memoryService.load(sessionId);
 
     // Step 2: Orchestrator — classify intent + extract field values
-    const { intent, extracted } = await classifyIntent(text);
+    const { intent, extracted } = await classifyIntent(text, orchestratorConfig);
     const mergedValidationData: Record<string, unknown> = {
       ...memory.validationData,
       ...extracted,
@@ -325,7 +338,7 @@ export default defineEventHandler(async (event) => {
       vectorSearchService.searchVehicles(text, 3),
       vectorSearchService.searchFAQs(text, 3),
     ]);
-    const systemPrompt = buildSpecialistPrompt(
+    let specialistPrompt = buildSpecialistPrompt(
       vehicles,
       faqs,
       mergedValidationData,
@@ -335,6 +348,9 @@ export default defineEventHandler(async (event) => {
       bookingResult,
       availableSlotsForPrompt
     );
+    if (specialistConfig.systemPrompt) {
+      specialistPrompt = specialistConfig.systemPrompt + '\n\n' + specialistPrompt;
+    }
 
     const history = memory.messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
@@ -347,7 +363,7 @@ export default defineEventHandler(async (event) => {
     const response = await getGenAI().models.generateContent({
       model: MODEL(),
       contents: [...history, { role: 'user', parts: [{ text }] }],
-      config: { systemInstruction: systemPrompt },
+      config: { systemInstruction: specialistPrompt, temperature: specialistConfig.temperature ?? 0.3 },
     });
     const replyText = response.text ?? 'Lo siento, no pude generar una respuesta.';
 

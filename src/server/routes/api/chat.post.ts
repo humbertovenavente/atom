@@ -2,6 +2,8 @@ import { GoogleGenAI } from '@google/genai';
 import { defineEventHandler, readBody, setHeader } from 'h3';
 import { createEmitter } from '../../sse/emitter';
 import type { ChatRequest, OrchestratorResult, ValidatorResult, BookingResult } from '../../../shared/types';
+import { connectDB } from '../../db/connect';
+import { Flow } from '../../models/flow';
 import { memoryService } from '../../memory/memory.service';
 import { vectorSearchService } from '../../services/vector-search.service';
 import { appointmentService, getAvailableSlots } from '../../services/appointment.service';
@@ -21,6 +23,11 @@ function getGenAI(): GoogleGenAI {
   return genaiClient;
 }
 const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.5-flash';
+
+function getNodeConfig(flow: any, nodeType: string): { systemPrompt?: string; temperature?: number } {
+  const node = flow?.nodes?.find((n: any) => n.type === nodeType);
+  return node?.data?.config ?? {};
+}
 
 // Orchestrator system prompt — built dynamically to inject current date
 function buildOrchestratorPrompt(): string {
@@ -47,12 +54,17 @@ Omite campos extracted que no estén presentes en el mensaje. Usa null para camp
 }
 
 async function classifyIntent(
-  message: string
+  message: string,
+  orchestratorConfig: { systemPrompt?: string; temperature?: number } = {}
 ): Promise<{ intent: OrchestratorResult['intent']; extracted: Record<string, unknown> }> {
+  let prompt = buildOrchestratorPrompt();
+  if (orchestratorConfig.systemPrompt) {
+    prompt += '\n\nINSTRUCCIONES ADICIONALES:\n' + orchestratorConfig.systemPrompt;
+  }
   const response = await getGenAI().models.generateContent({
     model: MODEL(),
     contents: [{ role: 'user', parts: [{ text: message }] }],
-    config: { systemInstruction: buildOrchestratorPrompt() },
+    config: { systemInstruction: prompt, temperature: orchestratorConfig.temperature ?? 0.3 },
   });
   try {
     const text = response.text ?? '';
@@ -269,6 +281,12 @@ export default defineEventHandler(async (event) => {
   const emit = createEmitter(event.node.res);
 
   try {
+    // Load flow config from DB
+    await connectDB();
+    const flow = await Flow.findOne({ flowId: 'default' }).lean() as any;
+    const orchestratorConfig = getNodeConfig(flow, 'orchestrator');
+    const specialistConfig = getNodeConfig(flow, 'specialist');
+
     // Step 1: Memory — load conversation history
     emit('agent_active', { node: 'memory', status: 'processing' });
     const memory = await memoryService.load(sessionId);
@@ -276,7 +294,7 @@ export default defineEventHandler(async (event) => {
 
     // Step 2: Orchestrator — classify intent + extract field values
     emit('agent_active', { node: 'orchestrator', status: 'processing' });
-    const { intent, extracted } = await classifyIntent(message);
+    const { intent, extracted } = await classifyIntent(message, orchestratorConfig);
     // Merge newly extracted fields with accumulated validationData
     const mergedValidationData: Record<string, unknown> = {
       ...memory.validationData,
@@ -350,7 +368,7 @@ export default defineEventHandler(async (event) => {
       vectorSearchService.searchVehicles(message, 3),
       vectorSearchService.searchFAQs(message, 3),
     ]);
-    const systemPrompt = buildSpecialistPrompt(
+    let specialistPrompt = buildSpecialistPrompt(
       vehicles,
       faqs,
       mergedValidationData,
@@ -360,6 +378,9 @@ export default defineEventHandler(async (event) => {
       bookingResult,
       availableSlotsForPrompt
     );
+    if (specialistConfig.systemPrompt) {
+      specialistPrompt = specialistConfig.systemPrompt + '\n\n' + specialistPrompt;
+    }
     // Map history to Gemini format (assistant → model, skip system messages)
     const history = memory.messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
@@ -371,7 +392,7 @@ export default defineEventHandler(async (event) => {
     const stream = await getGenAI().models.generateContentStream({
       model: MODEL(),
       contents: [...history, { role: 'user', parts: [{ text: message }] }],
-      config: { systemInstruction: systemPrompt },
+      config: { systemInstruction: specialistPrompt, temperature: specialistConfig.temperature ?? 0.3 },
     });
 
     let fullResponse = '';
