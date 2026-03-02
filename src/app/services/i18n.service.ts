@@ -18,6 +18,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'sidebar.generic.desc': 'General responses',
     'sidebar.tool': 'Tool',
     'sidebar.tool.desc': 'External tool integration',
+    'sidebar.telegram': 'Telegram',
+    'sidebar.telegram.desc': 'Telegram input channel',
 
     // Chat
     'chat.title': 'Chat',
@@ -70,6 +72,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'sidebar.generic.desc': 'Respuestas generales',
     'sidebar.tool': 'Herramienta',
     'sidebar.tool.desc': 'Integracion con herramientas externas',
+    'sidebar.telegram': 'Telegram',
+    'sidebar.telegram.desc': 'Canal de entrada desde Telegram',
 
     // Chat
     'chat.title': 'Chat',
