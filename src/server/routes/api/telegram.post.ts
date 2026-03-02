@@ -4,7 +4,8 @@ import { connectDB } from '../../db/connect';
 import { Flow } from '../../models/flow';
 import { memoryService } from '../../memory/memory.service';
 import { vectorSearchService } from '../../services/vector-search.service';
-import type { OrchestratorResult, ValidatorResult } from '../../../shared/types';
+import { appointmentService, getAvailableSlots } from '../../services/appointment.service';
+import type { OrchestratorResult, ValidatorResult, BookingResult } from '../../../shared/types';
 
 interface TelegramUpdate {
   update_id: number;
@@ -26,16 +27,29 @@ function getGenAI(): GoogleGenAI {
 }
 const MODEL = () => process.env['LLM_MODEL'] ?? 'gemini-2.5-flash';
 
-const ORCHESTRATOR_SYSTEM = `Eres un clasificador de intenciones para un asistente de agencia de autos.
+// Orchestrator system prompt — built dynamically to inject current date
+function buildOrchestratorPrompt(): string {
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const dayName = dayNames[now.getDay()];
+
+  return `Eres un clasificador de intenciones para un asistente de agencia de autos.
 Clasifica el mensaje del usuario en exactamente una de estas categorías:
 - "catalog": el usuario quiere ver vehículos, precios, o comparar modelos
 - "schedule": el usuario quiere agendar una cita, prueba de manejo, o visita
 - "faqs": el usuario tiene preguntas sobre financiamiento, garantías, políticas, o información general
 - "generic": cualquier otra consulta
 
+FECHA ACTUAL: Hoy es ${dayName} ${dateStr}. Usa esta fecha para resolver "mañana", "el viernes", "la próxima semana", etc.
+
 Analiza también si el usuario está proporcionando datos de campo (nombre, fecha, hora, presupuesto, tipo de vehículo).
+IMPORTANTE para "preferredTime": siempre usa formato 24 horas HH:mm (ejemplo: "15:00", "09:00"). Convierte "3pm" → "15:00", "10am" → "10:00".
+IMPORTANTE para "preferredDate": siempre usa formato YYYY-MM-DD (ejemplo: "2026-03-05"). Resuelve fechas relativas ("mañana", "el lunes") a la fecha real.
+
 Responde SOLO con JSON: {"intent": "<categoría>", "confidence": <0.0-1.0>, "extracted": {"fullName": "...", "preferredDate": "...", "preferredTime": "...", "budget": <número o null>, "vehicleType": "..."}}
 Omite campos extracted que no estén presentes en el mensaje. Usa null para campos numéricos ausentes.`;
+}
 
 async function classifyIntent(
   message: string
@@ -43,7 +57,7 @@ async function classifyIntent(
   const response = await getGenAI().models.generateContent({
     model: MODEL(),
     contents: [{ role: 'user', parts: [{ text: message }] }],
-    config: { systemInstruction: ORCHESTRATOR_SYSTEM },
+    config: { systemInstruction: buildOrchestratorPrompt() },
   });
   try {
     const text = response.text ?? '';
@@ -70,18 +84,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
   generic: [],
 };
 
-const NEXT_QUESTIONS: Record<string, Record<string, string>> = {
-  schedule: {
-    fullName: '¿Cuál es su nombre completo para la cita?',
-    preferredDate: '¿Qué fecha prefiere para su cita? (ej: 15 de marzo)',
-    preferredTime: '¿A qué hora prefiere su cita? (ej: 10:00 AM)',
-  },
-  catalog: {
-    budget: '¿Cuál es su presupuesto aproximado para el vehículo?',
-    vehicleType: '¿Qué tipo de vehículo le interesa? (sedán, SUV, pickup, hatchback, deportivo)',
-  },
-};
-
 function checkFields(
   intent: OrchestratorResult['intent'],
   existingData: Record<string, unknown>
@@ -92,38 +94,163 @@ function checkFields(
     isComplete: missing.length === 0,
     collectedData: existingData as Record<string, any>,
     missingFields: missing,
-    nextQuestion: missing[0] ? NEXT_QUESTIONS[intent]?.[missing[0]] : undefined,
   };
 }
+
+const FIELD_LABELS: Record<string, string> = {
+  fullName: 'nombre del cliente',
+  preferredDate: 'fecha preferida',
+  preferredTime: 'hora preferida',
+  budget: 'presupuesto aproximado',
+  vehicleType: 'tipo de vehículo',
+};
 
 function buildSpecialistPrompt(
   vehicles: unknown[],
   faqs: unknown[],
   validationData: Record<string, unknown>,
-  intent: string
+  intent: string,
+  missingFields: string[],
+  isComplete: boolean,
+  bookingResult?: BookingResult,
+  availableSlots?: string[]
 ): string {
+  const now = new Date();
+  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const todayStr = `${dayNames[now.getDay()]} ${now.getDate()} de ${monthNames[now.getMonth()]} de ${now.getFullYear()}`;
+
   const lines = [
-    'Eres un asesor experto de agencia de autos. Responde de forma concisa, amigable y profesional en español.',
+    'Eres un asesor de autos conversacional, amigable y profesional. Responde siempre en español.',
     '',
-    'CATÁLOGO DE VEHÍCULOS RELEVANTES:',
-    JSON.stringify(vehicles, null, 2),
+    `FECHA ACTUAL: Hoy es ${todayStr}. Usa esta fecha para resolver referencias relativas como "mañana", "el viernes", "la próxima semana", etc.`,
     '',
-    'PREGUNTAS FRECUENTES RELEVANTES:',
-    JSON.stringify(faqs, null, 2),
+    'REGLAS DE CONVERSACIÓN:',
+    '- NUNCA hagas preguntas directas tipo formulario ("¿Cuál es su presupuesto?", "¿Cuál es su nombre?")',
+    '- En su lugar, conversa naturalmente: muestra opciones, haz recomendaciones, y descubre preferencias a través del diálogo',
+    '- Si necesitas saber presupuesto, muestra rangos: "Tenemos desde compactos accesibles hasta SUVs premium..."',
+    '- Si necesitas un nombre, introdúcelo naturalmente: "Por cierto, ¿con quién tengo el gusto?"',
+    '- Recopila información orgánicamente durante la conversación, no como interrogatorio',
+    '- Sé conciso pero cálido. No repitas información que ya diste.',
   ];
-  if (intent === 'schedule' && Object.keys(validationData).length > 0) {
-    lines.push('', 'DATOS DE CITA RECOPILADOS:', JSON.stringify(validationData, null, 2));
-    lines.push('El cliente ha proporcionado todos los datos. Confirma la cita de forma cálida y profesional.');
-  } else if (intent === 'catalog' && Object.keys(validationData).length > 0) {
-    lines.push('', 'PREFERENCIAS DEL CLIENTE:', JSON.stringify(validationData, null, 2));
-    lines.push('Usa estas preferencias para personalizar tus recomendaciones de vehículos.');
+
+  const collectedEntries = Object.entries(validationData).filter(([, v]) => v != null && v !== '');
+  if (collectedEntries.length > 0) {
+    lines.push('', 'CONTEXTO RECOPILADO DEL CLIENTE:');
+    for (const [k, v] of collectedEntries) {
+      lines.push(`- ${FIELD_LABELS[k] ?? k}: ${v}`);
+    }
   }
-  lines.push('', 'Responde basándote en el contexto anterior. Si no tienes información suficiente, dilo honestamente.');
+
+  if (missingFields.length > 0) {
+    const labels = missingFields.map((f) => FIELD_LABELS[f] ?? f);
+    lines.push(
+      '',
+      `INFORMACIÓN PENDIENTE (integra su descubrimiento naturalmente en la conversación, NO preguntes directamente):`,
+      labels.map((l) => `- ${l}`).join('\n')
+    );
+  }
+
+  if (intent === 'catalog') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA CATÁLOGO:',
+      '- Muestra vehículos relevantes del contexto aunque no conozcas el presupuesto exacto',
+      '- Presenta opciones en diferentes rangos para que el cliente reaccione',
+      '- Destaca características, no solo precios',
+      '- Ve refinando recomendaciones según las reacciones del cliente'
+    );
+  } else if (intent === 'schedule') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA AGENDAR CITA:',
+      '- Ayuda al cliente a planear su visita de forma natural',
+      '- Sugiere horarios disponibles, menciona qué puede esperar en la visita',
+      '- Ve recopilando nombre completo, fecha y hora a lo largo de la conversación',
+      '- PROHIBIDO decir "agendamos", "tu cita está confirmada", "listo, te esperamos" o cualquier frase que implique que la cita ya fue reservada.',
+      '- SOLO el sistema puede confirmar una cita. Tú NO puedes confirmar citas.',
+      '- Mientras falten datos, di cosas como "para agendar necesito..." o "¿a qué hora te gustaría venir?"'
+    );
+    if (availableSlots && availableSlots.length > 0) {
+      lines.push(
+        '',
+        `HORARIOS DISPONIBLES (ÚNICAMENTE estos — NUNCA inventes otros): ${availableSlots.join(', ')}`,
+        'SOLO muestra los horarios de la lista HORARIOS DISPONIBLES. NUNCA inventes horarios.',
+        'Si el usuario no ha elegido hora, muéstrale SOLO estos horarios disponibles.'
+      );
+    } else if (!validationData['preferredDate']) {
+      lines.push(
+        '',
+        'No muestres horarios específicos todavía. Primero pide la fecha al cliente.'
+      );
+    } else {
+      lines.push(
+        '',
+        'No hay horarios disponibles para esa fecha. Sugiere que elija otra fecha.'
+      );
+    }
+  } else if (intent === 'faqs') {
+    lines.push(
+      '',
+      'INSTRUCCIONES PARA PREGUNTAS FRECUENTES:',
+      '- Responde directamente usando la información de FAQs disponible',
+      '- No necesitas recopilar datos adicionales'
+    );
+  }
+
+  if (isComplete && intent === 'schedule' && bookingResult) {
+    if (bookingResult.success) {
+      lines.push(
+        '',
+        'LA CITA FUE AGENDADA EXITOSAMENTE EN EL SISTEMA.',
+        'Confirma cálidamente al cliente resumiendo: nombre, fecha y hora reservada.',
+        'NO preguntes si quiere confirmar — la cita YA está confirmada.'
+      );
+    } else {
+      const reasonMessages: Record<string, string> = {
+        date_not_found: 'La fecha solicitada no tiene horarios disponibles.',
+        slot_not_available: 'La hora solicitada no está disponible para esa fecha.',
+        slot_already_booked: 'Esa hora ya fue reservada por otro cliente.',
+        day_fully_booked: 'El día ya tiene todas las citas ocupadas (máximo 4 por día).',
+      };
+      const reason = reasonMessages[bookingResult.reason ?? ''] ?? 'Hubo un problema al reservar.';
+      lines.push(
+        '',
+        `NO SE PUDO AGENDAR LA CITA: ${reason}`
+      );
+      if (bookingResult.availableSlots && bookingResult.availableSlots.length > 0) {
+        lines.push(
+          `HORARIOS DISPONIBLES para esa fecha: ${bookingResult.availableSlots.join(', ')}`,
+          'Muéstrale al cliente estos horarios disponibles y ayúdale a elegir uno.'
+        );
+      } else {
+        lines.push('No hay horarios disponibles para esa fecha. Sugiere otro día.');
+      }
+    }
+  } else if (isComplete && intent === 'schedule') {
+    lines.push(
+      '',
+      'La cita del cliente ya fue agendada previamente. No la vuelvas a confirmar. Solo responde a lo que pregunte.'
+    );
+  } else if (isComplete && intent === 'catalog') {
+    lines.push(
+      '',
+      'Ya tienes las preferencias del cliente. Haz recomendaciones personalizadas y específicas basándote en su presupuesto y tipo de vehículo preferido.'
+    );
+  }
+
+  if (vehicles.length > 0) {
+    lines.push('', 'VEHÍCULOS RELEVANTES:', JSON.stringify(vehicles, null, 2));
+  }
+  if (faqs.length > 0) {
+    lines.push('', 'PREGUNTAS FRECUENTES RELEVANTES:', JSON.stringify(faqs, null, 2));
+  }
+
   return lines.join('\n');
 }
 
 export default defineEventHandler(async (event) => {
-  // Always return 200 to Telegram — any non-200 causes Telegram to retry the update for up to 1 hour
+  // Always return 200 to Telegram — any non-200 causes Telegram to retry for up to 1 hour
   try {
     const body = await readBody<TelegramUpdate>(event);
 
@@ -157,49 +284,82 @@ export default defineEventHandler(async (event) => {
     // Step 3: Validator — check if required fields are complete
     const validationResult = checkFields(intent, mergedValidationData);
 
-    let replyText: string;
+    // Step 3.5: Booking — fields-first approach (same as chat endpoint)
+    let bookingResult: BookingResult | undefined;
+    const hasAllBookingFields =
+      !!mergedValidationData['fullName'] &&
+      !!mergedValidationData['preferredDate'] &&
+      !!mergedValidationData['preferredTime'];
+    const isBookingContext = hasAllBookingFields && !mergedValidationData['_bookingConfirmed'];
 
-    if (!validationResult.isComplete) {
-      // Validator short-circuits: ask for next missing field
-      replyText = validationResult.nextQuestion ?? '¿Podría proporcionar más información?';
-      await memoryService.save(sessionId, text, replyText, {
-        intent,
-        validationData: mergedValidationData,
-        agentType: 'validator',
-        source: 'telegram',
-      });
-    } else {
-      // Step 4: Specialist — vector context + non-streaming LLM response
-      // IMPORTANT: Use generateContent() NOT generateContentStream() — Telegram requires a complete reply
-      const [vehicles, faqs] = await Promise.all([
-        vectorSearchService.searchVehicles(text, 3),
-        vectorSearchService.searchFAQs(text, 3),
-      ]);
-      const systemPrompt = buildSpecialistPrompt(vehicles, faqs, validationResult.collectedData, intent);
-      const history = memory.messages
-        .filter((m) => m.role === 'user' || m.role === 'assistant')
-        .map((m) => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
+    const effectiveIntent: OrchestratorResult['intent'] = isBookingContext ? 'schedule' : intent;
 
-      const response = await getGenAI().models.generateContent({
-        model: MODEL(),
-        contents: [...history, { role: 'user', parts: [{ text }] }],
-        config: { systemInstruction: systemPrompt },
-      });
-      replyText = response.text ?? 'Lo siento, no pude generar una respuesta.';
+    if (isBookingContext) {
+      const { fullName, preferredDate, preferredTime } = mergedValidationData as Record<string, string>;
+      bookingResult = await appointmentService.bookAppointment(preferredDate, preferredTime, fullName, sessionId);
 
-      await memoryService.save(sessionId, text, replyText, {
-        intent,
-        validationData: validationResult.collectedData,
-        agentType: 'specialist',
-        source: 'telegram',
-      });
+      if (bookingResult.success) {
+        mergedValidationData['_bookingConfirmed'] = true;
+      } else {
+        if (bookingResult.reason === 'slot_already_booked') {
+          delete mergedValidationData['preferredTime'];
+        } else if (bookingResult.reason === 'day_fully_booked') {
+          delete mergedValidationData['preferredDate'];
+        }
+      }
     }
 
-    // Reply to Telegram user via Bot API (plain text, no Markdown parse_mode)
-    // TODO: revert TELEGRAM_API_BASE after testing — replace with https://api.telegram.org/bot${botToken}
+    // Re-evaluate validation with effective intent
+    const effectiveValidationResult = checkFields(effectiveIntent, mergedValidationData);
+
+    // Proactively fetch available slots when scheduling
+    let availableSlotsForPrompt: string[] = [];
+    const schedulingActive = effectiveIntent === 'schedule';
+    const dateKnown = !!mergedValidationData['preferredDate'];
+    if (schedulingActive && dateKnown && !mergedValidationData['_bookingConfirmed']) {
+      availableSlotsForPrompt = await getAvailableSlots(mergedValidationData['preferredDate'] as string);
+    }
+
+    // Step 4: Specialist — vector context + non-streaming LLM response
+    const [vehicles, faqs] = await Promise.all([
+      vectorSearchService.searchVehicles(text, 3),
+      vectorSearchService.searchFAQs(text, 3),
+    ]);
+    const systemPrompt = buildSpecialistPrompt(
+      vehicles,
+      faqs,
+      mergedValidationData,
+      effectiveIntent,
+      effectiveValidationResult.missingFields,
+      effectiveValidationResult.isComplete,
+      bookingResult,
+      availableSlotsForPrompt
+    );
+
+    const history = memory.messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+
+    // IMPORTANT: Use generateContent() NOT generateContentStream() — Telegram needs a complete reply
+    const response = await getGenAI().models.generateContent({
+      model: MODEL(),
+      contents: [...history, { role: 'user', parts: [{ text }] }],
+      config: { systemInstruction: systemPrompt },
+    });
+    const replyText = response.text ?? 'Lo siento, no pude generar una respuesta.';
+
+    // Save turn to MongoDB
+    await memoryService.save(sessionId, text, replyText, {
+      intent: effectiveIntent,
+      validationData: mergedValidationData,
+      agentType: 'specialist',
+      source: 'telegram',
+    });
+
+    // Reply to Telegram user via Bot API
     const TELEGRAM_API_BASE = process.env['TELEGRAM_API_BASE'] ?? `https://api.telegram.org/bot${botToken}`;
     await fetch(`${TELEGRAM_API_BASE}/sendMessage`, {
       method: 'POST',
